@@ -30,16 +30,29 @@ end)
 
 local Main = Instance.new("Frame")
 Main.Parent = Gui
-Main.Size = UDim2.new(0, 920, 0, 560)
-Main.Position = UDim2.new(0.5, -460, 0.5, -280)
+Main.AnchorPoint = Vector2.new(0.5, 0.5)
+Main.Size = UDim2.new(0, 920, 0, 580)
+Main.Position = UDim2.new(0.5, 0, 0.5, 0)
 Main.BackgroundColor3 = Color3.fromRGB(18,18,22)
 Main.BorderSizePixel = 0
 Main.Active = true
+Main.ClipsDescendants = false
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 14)
 local Stroke = Instance.new("UIStroke", Main)
 Stroke.Color = Color3.fromRGB(45,45,55)
 Stroke.Thickness = 1
 Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+local UIScale = Instance.new("UIScale", Gui)
+UIScale.Scale = 1
+local function updateScale()
+	local vp = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920,1080)
+	local s = math.clamp(math.min(vp.X/1366, vp.Y/768), 0.6, 1)
+	UIScale.Scale = s
+end
+updateScale()
+pcall(function() workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale) end)
+Gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateScale)
 
 local Shadow = Instance.new("ImageLabel", Gui)
 Shadow.Name = "Shadow"
@@ -54,6 +67,12 @@ Shadow.ZIndex = 0
 
 Main.ZIndex = 2
 Shadow.ZIndex = 1
+local function syncShadow()
+	local p = Main.Position
+	Shadow.Position = UDim2.new(p.X.Scale, p.X.Offset - 20, p.Y.Scale, p.Y.Offset - 20)
+end
+Main:GetPropertyChangedSignal("Position"):Connect(syncShadow)
+syncShadow()
 
 do
 	local dragging, dragInput, dragStart, startPos
@@ -293,8 +312,20 @@ local ArgsPad = Instance.new("UIPadding", Args)
 ArgsPad.PaddingLeft = UDim.new(0, 8)
 ArgsPad.PaddingTop = UDim.new(0, 6)
 
+local ArgHint = Instance.new("TextLabel", InfoPanel)
+ArgHint.Name = "ArgHint"
+ArgHint.Position = UDim2.new(0, 12, 0, 202)
+ArgHint.Size = UDim2.new(1, -24, 0, 14)
+ArgHint.BackgroundTransparency = 1
+ArgHint.Text = "Detecting expected args..."
+ArgHint.Font = Enum.Font.Gotham
+ArgHint.TextSize = 9
+ArgHint.TextColor3 = Color3.fromRGB(150,150,165)
+ArgHint.TextXAlignment = Enum.TextXAlignment.Left
+ArgHint.TextTruncate = Enum.TextTruncate.AtEnd
+
 local TargetLabel = Instance.new("TextLabel", InfoPanel)
-TargetLabel.Position = UDim2.new(0, 12, 0, 208)
+TargetLabel.Position = UDim2.new(0, 12, 0, 220)
 TargetLabel.Size = UDim2.new(1, -24, 0, 14)
 TargetLabel.BackgroundTransparency = 1
 TargetLabel.Text = "Target Player (username field)"
@@ -305,7 +336,7 @@ TargetLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local UsernameBox = Instance.new("TextBox", InfoPanel)
 UsernameBox.Name = "UsernameBox"
-UsernameBox.Position = UDim2.new(0, 12, 0, 224)
+UsernameBox.Position = UDim2.new(0, 12, 0, 236)
 UsernameBox.Size = UDim2.new(1, -90, 0, 32)
 UsernameBox.PlaceholderText = "Username / DisplayName..."
 UsernameBox.Text = ""
@@ -326,7 +357,7 @@ UBP.PaddingLeft = UDim.new(0, 8)
 
 local TargetToggle = Instance.new("TextButton", InfoPanel)
 TargetToggle.Name = "TargetToggle"
-TargetToggle.Position = UDim2.new(1, -70, 0, 224)
+TargetToggle.Position = UDim2.new(1, -70, 0, 236)
 TargetToggle.Size = UDim2.new(0, 58, 0, 32)
 TargetToggle.Text = "OFF"
 TargetToggle.Font = Enum.Font.GothamBold
@@ -337,7 +368,7 @@ TargetToggle.BorderSizePixel = 0
 Instance.new("UICorner", TargetToggle).CornerRadius = UDim.new(0, 6)
 
 local TargetStatus = Instance.new("TextLabel", InfoPanel)
-TargetStatus.Position = UDim2.new(0, 12, 0, 258)
+TargetStatus.Position = UDim2.new(0, 12, 0, 270)
 TargetStatus.Size = UDim2.new(1, -24, 0, 12)
 TargetStatus.BackgroundTransparency = 1
 TargetStatus.Text = "Toggle ON to inject target into FireServer args"
@@ -347,7 +378,7 @@ TargetStatus.TextColor3 = Color3.fromRGB(140,140,155)
 TargetStatus.TextXAlignment = Enum.TextXAlignment.Left
 
 local ModeLabel = Instance.new("TextLabel", InfoPanel)
-ModeLabel.Position = UDim2.new(0, 12, 0, 274)
+ModeLabel.Position = UDim2.new(0, 12, 0, 286)
 ModeLabel.Size = UDim2.new(0, 80, 0, 22)
 ModeLabel.BackgroundTransparency = 1
 ModeLabel.Text = "Inject mode:"
@@ -357,7 +388,7 @@ ModeLabel.TextColor3 = Color3.fromRGB(160,160,175)
 ModeLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local ModeButton = Instance.new("TextButton", InfoPanel)
-ModeButton.Position = UDim2.new(0, 92, 0, 274)
+ModeButton.Position = UDim2.new(0, 92, 0, 286)
 ModeButton.Size = UDim2.new(1, -104, 0, 22)
 ModeButton.Text = "First Arg = Player Name (string)"
 ModeButton.Font = Enum.Font.Gotham
@@ -368,7 +399,7 @@ ModeButton.BorderSizePixel = 0
 Instance.new("UICorner", ModeButton).CornerRadius = UDim.new(0, 6)
 
 local PlayerListLabel = Instance.new("TextLabel", InfoPanel)
-PlayerListLabel.Position = UDim2.new(0, 12, 0, 302)
+PlayerListLabel.Position = UDim2.new(0, 12, 0, 314)
 PlayerListLabel.Size = UDim2.new(0.5, 0, 0, 16)
 PlayerListLabel.BackgroundTransparency = 1
 PlayerListLabel.Text = "Player List (click to select)"
@@ -378,7 +409,7 @@ PlayerListLabel.TextColor3 = Color3.fromRGB(180,180,195)
 PlayerListLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local RefreshPlayers = Instance.new("TextButton", InfoPanel)
-RefreshPlayers.Position = UDim2.new(1, -70, 0, 300)
+RefreshPlayers.Position = UDim2.new(1, -70, 0, 312)
 RefreshPlayers.Size = UDim2.new(0, 58, 0, 18)
 RefreshPlayers.Text = "Refresh"
 RefreshPlayers.Font = Enum.Font.GothamBold
@@ -389,7 +420,7 @@ RefreshPlayers.BorderSizePixel = 0
 Instance.new("UICorner", RefreshPlayers).CornerRadius = UDim.new(1,0)
 
 local PlayerSearch = Instance.new("TextBox", InfoPanel)
-PlayerSearch.Position = UDim2.new(0, 12, 0, 320)
+PlayerSearch.Position = UDim2.new(0, 12, 0, 332)
 PlayerSearch.Size = UDim2.new(1, -24, 0, 24)
 PlayerSearch.PlaceholderText = "Filter players..."
 PlayerSearch.Text = ""
@@ -404,8 +435,8 @@ local PSP = Instance.new("UIPadding", PlayerSearch)
 PSP.PaddingLeft = UDim.new(0, 8)
 
 local PlayerList = Instance.new("ScrollingFrame", InfoPanel)
-PlayerList.Position = UDim2.new(0, 12, 0, 350)
-PlayerList.Size = UDim2.new(1, -24, 0, 96)
+PlayerList.Position = UDim2.new(0, 12, 0, 362)
+PlayerList.Size = UDim2.new(1, -24, 0, 84)
 PlayerList.CanvasSize = UDim2.new(0,0,0,0)
 PlayerList.ScrollBarThickness = 3
 PlayerList.BackgroundColor3 = Color3.fromRGB(30,30,38)
@@ -423,7 +454,7 @@ PLPad.PaddingBottom = UDim.new(0, 4)
 
 local HoneypotToggle = Instance.new("TextButton", InfoPanel)
 HoneypotToggle.Name = "HoneypotToggle"
-HoneypotToggle.Position = UDim2.new(0, 12, 0, 452)
+HoneypotToggle.Position = UDim2.new(0, 12, 0, 464)
 HoneypotToggle.Size = UDim2.new(1, -24, 0, 20)
 HoneypotToggle.Text = "🛡  Block honeypots: ON (tap to disable risky filter)"
 HoneypotToggle.Font = Enum.Font.GothamBold
@@ -434,7 +465,7 @@ HoneypotToggle.BorderSizePixel = 0
 Instance.new("UICorner", HoneypotToggle).CornerRadius = UDim.new(0, 6)
 
 local Run = Instance.new("TextButton", InfoPanel)
-Run.Position = UDim2.new(0, 12, 0, 476)
+Run.Position = UDim2.new(0, 12, 0, 488)
 Run.Size = UDim2.new(1, -24, 0, 38)
 Run.Text = "Fire / Invoke  ▶"
 Run.BackgroundColor3 = Color3.fromRGB(80,130,255)
@@ -476,6 +507,28 @@ local function tableCount(t) local c=0 for _ in pairs(t) do c+=1 end return c en
 
 local HoneypotKeywords = {"ban","kick","punish","log","cheat","exploit","detect","anticheat","byfron","flag","report","moderate","crash","shutdown","honeypot","trap","warn","jail","blacklist","antiexploit","ac6"}
 local HoneypotPathKeywords = {"admin","moderation","security","anticheat","audit","logs","ban"}
+local UselessSubstrings = {"coregui","robloxreplicatedstorage","corepackages","analyticsservice","socialservice","chatservice","insertservice","voicechat","textchatservice","robloxcore","defaultchat"}
+local function isUselessRemote(obj)
+	local ok, path = pcall(function() return safeGetFullName(obj) end)
+	if not ok then path = obj:GetFullName() end
+	path = path:lower()
+	for _,kw in ipairs(UselessSubstrings) do
+		if path:find(kw,1,true) then return true end
+	end
+	local p = obj.Parent
+	while p do
+		if p == game:GetService("CoreGui") then return true end
+		pcall(function()
+			if p == game:GetService("RobloxReplicatedStorage") then return true end
+		end)
+		if p.Name == "RobloxReplicatedStorage" or p.Name == "CorePackages" or p.Name == "CoreGui" then return true end
+		p = p.Parent
+	end
+	if obj:IsDescendantOf(game:GetService("CoreGui")) then return true end
+	local ok2 = pcall(function() return obj:IsDescendantOf(game:GetService("RobloxReplicatedStorage")) end)
+	if ok2 and obj:IsDescendantOf(game:GetService("RobloxReplicatedStorage")) then return true end
+	return false
+end
 
 local function getHoneypotInfo(obj)
 	local name = obj.Name:lower()
@@ -544,6 +597,89 @@ local function setClipboard(s)
 	if not did and toclipboard then pcall(toclipboard, s) did = true end
 	if not did and set_clipboard then pcall(set_clipboard, s) did = true end
 	return did
+end
+
+local ObservedArgs = {}
+pcall(function()
+	if hookmetamethod and getnamecallmethod then
+		local old
+		old = hookmetamethod(game, "__namecall", function(self, ...)
+			local m = getnamecallmethod()
+			if (m == "FireServer" or m == "InvokeServer") and (self:IsA("RemoteEvent") or self:IsA("RemoteFunction")) then
+				ObservedArgs[self] = {...}
+				if Selected == self then
+					local types = {}
+					for _,v in ipairs(ObservedArgs[self]) do table.insert(types, typeof(v)) end
+					ArgHint.Text = "↻ Observed: ("..table.concat(types, ", ")..") - "..tostring(#ObservedArgs[self]).." args"
+					ArgHint.TextColor3 = Color3.fromRGB(110,200,160)
+				end
+			end
+			return old(self, ...)
+		end)
+	end
+end)
+
+local function inferHintFromName(name)
+	name=name:lower()
+	if name:find("chat") or name:find("message") or name:find("say") then return 'Expects: (string) e.g. "hello"'
+	elseif name:find("position") or name:find("move") or name:find("teleport") or name:find("vector") then return "Expects: (Vector3) e.g. Vector3.new(0,5,0)"
+	elseif name:find("damage") or name:find("health") or name:find("money") or name:find("cash") or name:find("coin") then return "Expects: (number) e.g. 100"
+	elseif name:find("equip") or name:find("tool") then return "Expects: (string toolName) or (Instance)"
+	elseif name:find("buy") or name:find("purchase") then return "Expects: (string itemId, number amount)"
+	elseif name:find("kick") or name:find("ban") then return "⚠ Ban remote - do not fire"
+	else return nil end
+end
+
+local function detectExpectedArgs(remote)
+	if ObservedArgs[remote] then
+		local types={}
+		for _,v in ipairs(ObservedArgs[remote]) do table.insert(types, typeof(v)) end
+		return "↻ Live: ("..table.concat(types, ", ")..") - captured from game"
+	end
+	local name=remote.Name
+	local hint=inferHintFromName(name)
+	if hint then return hint end
+	local found={}
+	local searchName=name
+	for _,v in ipairs(game:GetDescendants()) do
+		if v:IsA("LocalScript") or v:IsA("Script") or v:IsA("ModuleScript") then
+			local ok, src = pcall(function()
+				if decompile then return decompile(v) end
+				return nil
+			end)
+			if ok and src and type(src)=="string" and src:find(searchName,1,true) then
+				for args in src:gmatch(searchName.."%s*:%s*FireServer%s*%((.-)%)") do
+					table.insert(found, args:gsub("%s+", " "):sub(1,80))
+					if #found>=2 then break end
+				end
+				for args in src:gmatch(searchName.."%s*:%s*InvokeServer%s*%((.-)%)") do
+					table.insert(found, args:gsub("%s+", " "):sub(1,80))
+					if #found>=2 then break end
+				end
+			end
+			if #found>=2 then break end
+		end
+	end
+	if #found>0 then
+		return "Found in scripts: ("..found[1]..")"
+	end
+	return "No pattern found — try: string, number, or $target. Use 'Copy Code' and inspect."
+end
+
+local function updateArgHint(remote)
+	ArgHint.Text = "Detecting..."
+	ArgHint.TextColor3 = Color3.fromRGB(150,150,165)
+	task.spawn(function()
+		local ok, res = pcall(detectExpectedArgs, remote)
+		if ok then
+			ArgHint.Text = res
+			if res:find("Live:") or res:find("Found") then ArgHint.TextColor3 = Color3.fromRGB(110,200,160)
+			elseif res:find("Expects") then ArgHint.TextColor3 = Color3.fromRGB(180,190,255)
+			else ArgHint.TextColor3 = Color3.fromRGB(150,150,165) end
+		else
+			ArgHint.Text = "No pattern found"
+		end
+	end)
 end
 
 local function ParseArgs(text)
@@ -760,6 +896,7 @@ local function selectRemote(obj)
 		HoneypotBadge.Text = "● CAUTION — "..hp.score.." — "..table.concat(hp.reasons, ", ")
 		HoneypotReason.Text = "Low risk but check args"
 	end
+	updateArgHint(obj)
 	for o,b in pairs(Buttons) do
 		if o == obj then
 			b.BackgroundColor3 = Color3.fromRGB(80,130,220)
@@ -773,6 +910,7 @@ end
 
 local function AddRemote(obj)
 	if Remotes[obj] then return end
+	if isUselessRemote(obj) then return end
 	Remotes[obj] = true
 	local Button = Instance.new("TextButton", List)
 	Button.Size = UDim2.new(1, -6, 0, 28)
