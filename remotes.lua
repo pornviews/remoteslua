@@ -1,9 +1,5 @@
 repeat task.wait() until game:IsLoaded()
 
--- // remotes.lua | expensiveproblems - UPGRADED //
--- Fixed loader, player targeting, full overhaul
--- Original by wheresocyz -> rebranded expensiveproblems
-
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
@@ -11,8 +7,6 @@ local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-
--- cleanup old gui (prevents duplicates on re-execute)
 local gethui = gethui or (get_hidden_gui or gethiddenGui)
 local hostGui = nil
 pcall(function()
@@ -33,7 +27,6 @@ pcall(function()
 	if syn and syn.protect_gui then syn.protect_gui(Gui) end
 end)
 
--- Main frame
 local Main = Instance.new("Frame")
 Main.Parent = Gui
 Main.Size = UDim2.new(0, 920, 0, 560)
@@ -47,7 +40,6 @@ Stroke.Color = Color3.fromRGB(45,45,55)
 Stroke.Thickness = 1
 Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
--- shadow
 local Shadow = Instance.new("ImageLabel", Gui)
 Shadow.Name = "Shadow"
 Shadow.BackgroundTransparency = 1
@@ -59,11 +51,9 @@ Shadow.ScaleType = Enum.ScaleType.Slice
 Shadow.SliceCenter = Rect.new(10,10,118,118)
 Shadow.ZIndex = 0
 
--- make Main above shadow
 Main.ZIndex = 2
 Shadow.ZIndex = 1
 
--- Draggable (custom, works on all executors)
 do
 	local dragging, dragInput, dragStart, startPos
 	local function update(input)
@@ -90,7 +80,6 @@ do
 	end)
 end
 
--- Header
 local Header = Instance.new("Frame", Main)
 Header.Size = UDim2.new(1, 0, 0, 44)
 Header.BackgroundColor3 = Color3.fromRGB(28,28,34)
@@ -134,7 +123,6 @@ MinBtn.TextColor3 = Color3.fromRGB(200,200,210)
 MinBtn.BorderSizePixel = 0
 Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(1,0)
 
--- Left panel (remote list)
 local Search = Instance.new("TextBox", Main)
 Search.Position = UDim2.new(0, 14, 0, 56)
 Search.Size = UDim2.new(0.48, -14, 0, 32)
@@ -253,7 +241,6 @@ HoneypotReason.TextXAlignment = Left
 HoneypotReason.TextTruncated = true
 HoneypotReason.Visible = false
 
--- copy buttons row
 local CopyPath = Instance.new("TextButton", InfoPanel)
 CopyPath.Position = UDim2.new(0, 12, 0, 118)
 CopyPath.Size = UDim2.new(0.5, -16, 0, 24)
@@ -276,7 +263,6 @@ CopyCode.TextColor3 = Color3.new(1,1,1)
 CopyCode.BorderSizePixel = 0
 Instance.new("UICorner", CopyCode).CornerRadius = UDim.new(0, 6)
 
--- Args
 local ArgsLabel = Instance.new("TextLabel", InfoPanel)
 ArgsLabel.Position = UDim2.new(0, 12, 0, 148)
 ArgsLabel.Size = UDim2.new(1, -24, 0, 14)
@@ -307,7 +293,6 @@ local ArgsPad = Instance.new("UIPadding", Args)
 ArgsPad.PaddingLeft = UDim.new(0, 8)
 ArgsPad.PaddingTop = UDim.new(0, 6)
 
--- === USERNAME FIELD + TOGGLE + PLAYERLIST (REQUESTED FEATURE) ===
 local TargetLabel = Instance.new("TextLabel", InfoPanel)
 TargetLabel.Position = UDim2.new(0, 12, 0, 208)
 TargetLabel.Size = UDim2.new(1, -24, 0, 14)
@@ -361,7 +346,6 @@ TargetStatus.TextSize = 10
 TargetStatus.TextColor3 = Color3.fromRGB(140,140,155)
 TargetStatus.TextXAlignment = Left
 
--- Injection mode
 local ModeLabel = Instance.new("TextLabel", InfoPanel)
 ModeLabel.Position = UDim2.new(0, 12, 0, 274)
 ModeLabel.Size = UDim2.new(0, 80, 0, 22)
@@ -383,7 +367,6 @@ ModeButton.TextColor3 = Color3.new(1,1,1)
 ModeButton.BorderSizePixel = 0
 Instance.new("UICorner", ModeButton).CornerRadius = UDim.new(0, 6)
 
--- PlayerList
 local PlayerListLabel = Instance.new("TextLabel", InfoPanel)
 PlayerListLabel.Position = UDim2.new(0, 12, 0, 302)
 PlayerListLabel.Size = UDim2.new(0.5, 0, 0, 16)
@@ -438,7 +421,6 @@ PLPad.PaddingLeft = UDim.new(0, 4)
 PLPad.PaddingRight = UDim.new(0, 4)
 PLPad.PaddingBottom = UDim.new(0, 4)
 
--- Honeypot block toggle Row (above Run)
 local HoneypotToggle = Instance.new("TextButton", InfoPanel)
 HoneypotToggle.Name = "HoneypotToggle"
 HoneypotToggle.Position = UDim2.new(0, 12, 0, 452)
@@ -451,7 +433,6 @@ HoneypotToggle.TextColor3 = Color3.fromRGB(140,255,170)
 HoneypotToggle.BorderSizePixel = 0
 Instance.new("UICorner", HoneypotToggle).CornerRadius = UDim.new(0, 6)
 
--- Fire button
 local Run = Instance.new("TextButton", InfoPanel)
 Run.Position = UDim2.new(0, 12, 0, 476)
 Run.Size = UDim2.new(1, -24, 0, 38)
@@ -475,7 +456,6 @@ Log.TextColor3 = Color3.fromRGB(140,140,155)
 Log.TextXAlignment = Left
 Log.TextTruncated = true
 
--- state
 local Remotes = {}
 local Buttons = {}
 local Selected = nil
@@ -515,20 +495,16 @@ local function getHoneypotInfo(obj)
 			table.insert(reasons, "path:"..kw)
 		end
 	end
-	-- rarely used / suspicious parent
 	if path:find("workspace") or path:find("players.") then
 		score += 10
 		table.insert(reasons, "unusual location")
 	end
-	-- generic bait names like "BanRemote" "KickEvent"
 	if name:match("^%w+remote$") and #name < 14 then
-		-- not suspicious
 	else
 		if name:len() <= 3 and name:match("^[a-z]+$") then
 			score += 8
 		end
 	end
-	-- score clamp
 	if score > 100 then score = 100 end
 	local level = "SAFE"
 	local color = Color3.fromRGB(90,200,120)
@@ -571,7 +547,6 @@ local function setClipboard(s)
 	return did
 end
 
--- improved arg parser: supports quoted strings, numbers, bool, nil, and json-like tables
 local function ParseArgs(text)
 	if not text or text:match("^%s*$") then return {} end
 	local args = {}
@@ -604,7 +579,7 @@ local function ParseArgs(text)
 			end
 			table.insert(args, str)
 		elseif c == "{" or c == "[" then
-			-- try to parse as table/array via loadstring fallback
+			-- try to parse 9 table/array via loadstring fallback
 			local brace = c
 			local close = brace == "{" and "}" or "]"
 			local depth = 0
