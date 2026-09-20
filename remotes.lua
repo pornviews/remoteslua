@@ -7,6 +7,7 @@ local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
 local gethui = gethui or (get_hidden_gui or gethiddenGui)
 local hostGui = nil
 pcall(function()
@@ -99,7 +100,7 @@ Title.BackgroundTransparency = 1
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 14
 Title.TextColor3 = Color3.fromRGB(235,235,240)
-Title.TextXAlignment = Left
+Title.TextXAlignment = Enum.TextXAlignment.Left
 
 local CloseBtn = Instance.new("TextButton", Header)
 CloseBtn.Size = UDim2.new(0, 26, 0, 26)
@@ -180,7 +181,7 @@ CountLabel.Text = "0 remotes"
 CountLabel.Font = Enum.Font.Gotham
 CountLabel.TextSize = 12
 CountLabel.TextColor3 = Color3.fromRGB(160,160,170)
-CountLabel.TextXAlignment = Right
+CountLabel.TextXAlignment = Enum.TextXAlignment.Right
 
 local List = Instance.new("ScrollingFrame", Main)
 List.Position = UDim2.new(0, 14, 0, 122)
@@ -196,7 +197,6 @@ local Layout = Instance.new("UIListLayout", List)
 Layout.Padding = UDim.new(0, 5)
 Layout.SortOrder = Enum.SortOrder.LayoutOrder
 
--- Right panel
 local InfoPanel = Instance.new("Frame", Main)
 InfoPanel.Position = UDim2.new(0.5, 6, 0, 56)
 InfoPanel.Size = UDim2.new(0.5, -20, 1, -70)
@@ -210,7 +210,7 @@ Info.Size = UDim2.new(1, -24, 0, 92)
 Info.BackgroundTransparency = 1
 Info.TextWrapped = true
 Info.TextYAlignment = Enum.TextYAlignment.Top
-Info.TextXAlignment = Left
+Info.TextXAlignment = Enum.TextXAlignment.Left
 Info.Font = Enum.Font.Gotham
 Info.TextSize = 12
 Info.TextColor3 = Color3.fromRGB(220,220,230)
@@ -237,7 +237,7 @@ HoneypotReason.Text = ""
 HoneypotReason.Font = Enum.Font.Gotham
 HoneypotReason.TextSize = 9
 HoneypotReason.TextColor3 = Color3.fromRGB(160,160,170)
-HoneypotReason.TextXAlignment = Left
+HoneypotReason.TextXAlignment = Enum.TextXAlignment.Left
 HoneypotReason.TextTruncated = true
 HoneypotReason.Visible = false
 
@@ -271,7 +271,7 @@ ArgsLabel.Text = "Arguments (comma separated, supports: \"hi\", 123, true, nil, 
 ArgsLabel.Font = Enum.Font.Gotham
 ArgsLabel.TextSize = 10
 ArgsLabel.TextColor3 = Color3.fromRGB(150,150,165)
-ArgsLabel.TextXAlignment = Left
+ArgsLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local Args = Instance.new("TextBox", InfoPanel)
 Args.Position = UDim2.new(0, 12, 0, 164)
@@ -284,8 +284,8 @@ Args.PlaceholderColor3 = Color3.fromRGB(120,120,130)
 Args.Font = Enum.Font.Gotham
 Args.TextSize = 12
 Args.ClearTextOnFocus = false
-Args.TextXAlignment = Left
-Args.TextYAlignment = Top
+Args.TextXAlignment = Enum.TextXAlignment.Left
+Args.TextYAlignment = Enum.TextYAlignment.Top
 Args.BorderSizePixel = 0
 Args.TextWrapped = true
 Instance.new("UICorner", Args).CornerRadius = UDim.new(0, 6)
@@ -301,7 +301,7 @@ TargetLabel.Text = "Target Player (username field)"
 TargetLabel.Font = Enum.Font.GothamBold
 TargetLabel.TextSize = 11
 TargetLabel.TextColor3 = Color3.fromRGB(180,180,195)
-TargetLabel.TextXAlignment = Left
+TargetLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local UsernameBox = Instance.new("TextBox", InfoPanel)
 UsernameBox.Name = "UsernameBox"
@@ -344,7 +344,7 @@ TargetStatus.Text = "Toggle ON to inject target into FireServer args"
 TargetStatus.Font = Enum.Font.Gotham
 TargetStatus.TextSize = 10
 TargetStatus.TextColor3 = Color3.fromRGB(140,140,155)
-TargetStatus.TextXAlignment = Left
+TargetStatus.TextXAlignment = Enum.TextXAlignment.Left
 
 local ModeLabel = Instance.new("TextLabel", InfoPanel)
 ModeLabel.Position = UDim2.new(0, 12, 0, 274)
@@ -354,7 +354,7 @@ ModeLabel.Text = "Inject mode:"
 ModeLabel.Font = Enum.Font.Gotham
 ModeLabel.TextSize = 11
 ModeLabel.TextColor3 = Color3.fromRGB(160,160,175)
-ModeLabel.TextXAlignment = Left
+ModeLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local ModeButton = Instance.new("TextButton", InfoPanel)
 ModeButton.Position = UDim2.new(0, 92, 0, 274)
@@ -375,7 +375,7 @@ PlayerListLabel.Text = "Player List (click to select)"
 PlayerListLabel.Font = Enum.Font.GothamBold
 PlayerListLabel.TextSize = 11
 PlayerListLabel.TextColor3 = Color3.fromRGB(180,180,195)
-PlayerListLabel.TextXAlignment = Left
+PlayerListLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local RefreshPlayers = Instance.new("TextButton", InfoPanel)
 RefreshPlayers.Position = UDim2.new(1, -70, 0, 300)
@@ -453,7 +453,7 @@ Log.Text = "Ready • expensiveproblems"
 Log.Font = Enum.Font.Gotham
 Log.TextSize = 10
 Log.TextColor3 = Color3.fromRGB(140,140,155)
-Log.TextXAlignment = Left
+Log.TextXAlignment = Enum.TextXAlignment.Left
 Log.TextTruncated = true
 
 local Remotes = {}
@@ -469,9 +469,9 @@ local Modes = {
 	"Append as Last Arg (string)",
 }
 local CurrentFilter = "All"
-local safeGetFullName -- forward declare for honeypot
-local BlockHoneypots = true -- toggle honeypot protection
-local PendingConfirm = nil -- {obj = ..., untilTime = ...}
+local safeGetFullName
+local BlockHoneypots = true
+local PendingConfirm = nil
 local function tableCount(t) local c=0 for _ in pairs(t) do c+=1 end return c end
 
 local HoneypotKeywords = {"ban","kick","punish","log","cheat","exploit","detect","anticheat","byfron","flag","report","moderate","crash","shutdown","honeypot","trap","warn","jail","blacklist","antiexploit","ac6"}
@@ -529,7 +529,6 @@ end
 safeGetFullName = function(obj)
 	local ok, res = pcall(function() return obj:GetFullName() end)
 	if ok then return res end
-	-- fallback
 	local n = obj.Name
 	local cur = obj.Parent
 	while cur and cur ~= game do
@@ -579,7 +578,6 @@ local function ParseArgs(text)
 			end
 			table.insert(args, str)
 		elseif c == "{" or c == "[" then
-			-- try to parse 9 table/array via loadstring fallback
 			local brace = c
 			local close = brace == "{" and "}" or "]"
 			local depth = 0
@@ -603,15 +601,13 @@ local function ParseArgs(text)
 			while i <= len and text:sub(i,i) ~= "," do i+=1 end
 			local part = text:sub(start, i-1):match("^%s*(.-)%s*$")
 			if part ~= "" then
-				if part == "nil" then table.insert(args, nil) -- hole handling below
+				if part == "nil" then table.insert(args, nil)
 				elseif part == "true" then table.insert(args, true)
 				elseif part == "false" then table.insert(args, false)
 				elseif tonumber(part) then table.insert(args, tonumber(part))
 				elseif part == "$target" and TargetEnabled and TargetPlayer then
-					-- will be replaced via injection logic, keep placeholder for now
 					table.insert(args, TargetPlayer.Name)
 				else
-					-- check for game.Players.<name> or plain player name that matches target
 					table.insert(args, part)
 				end
 			end
@@ -619,9 +615,6 @@ local function ParseArgs(text)
 		skipSpace()
 		if i <= len and text:sub(i,i) == "," then i+=1 end
 	end
-	-- fix nil holes: ParseArgs can't have nil holes via table.insert, need to handle explicitly
-	-- if user typed "nil" we need to keep position. Use second pass for nil
-	-- simple: if raw text contains "nil" separated by commas, reconstruct with nil
 	if text:find("nil") then
 		local rawParts = {}
 		for p in string.gmatch(text, "[^,]+") do table.insert(rawParts, p:match("^%s*(.-)%s*$")) end
@@ -631,7 +624,6 @@ local function ParseArgs(text)
 	return args
 end
 
--- player resolution
 local function resolvePlayer(query)
 	if not query or query:match("^%s*$") then return nil end
 	query = query:lower():gsub("^%s+",""):gsub("%s+$","")
@@ -670,7 +662,6 @@ local function updateTargetVisual()
 	end
 end
 
--- player list builder
 local function clearPlayerList()
 	for _,c in ipairs(PlayerList:GetChildren()) do
 		if c:IsA("TextButton") then c:Destroy() end
@@ -710,7 +701,7 @@ local function buildPlayerList()
 			NameLbl.Font = Enum.Font.Gotham
 			NameLbl.TextSize = 11
 			NameLbl.TextColor3 = Color3.new(1,1,1)
-			NameLbl.TextXAlignment = Left
+			NameLbl.TextXAlignment = Enum.TextXAlignment.Left
 			NameLbl.TextTruncated = true
 
 			local SelDot = Instance.new("Frame", Btn)
@@ -733,7 +724,6 @@ local function buildPlayerList()
 	PlayerList.CanvasSize = UDim2.new(0,0,0, PLLayout.AbsoluteContentSize.Y + 8)
 end
 
--- remotes handling
 local function applyFilter()
 	local q = Search.Text:lower()
 	for obj, btn in pairs(Buttons) do
@@ -770,7 +760,6 @@ local function selectRemote(obj)
 		HoneypotBadge.Text = "● CAUTION — "..hp.score.." — "..table.concat(hp.reasons, ", ")
 		HoneypotReason.Text = "Low risk but check args"
 	end
-	-- highlight
 	for o,b in pairs(Buttons) do
 		if o == obj then
 			b.BackgroundColor3 = Color3.fromRGB(80,130,220)
@@ -787,9 +776,8 @@ local function AddRemote(obj)
 	Remotes[obj] = true
 	local Button = Instance.new("TextButton", List)
 	Button.Size = UDim2.new(1, -6, 0, 28)
-	Button.TextXAlignment = Left
+	Button.TextXAlignment = Enum.TextXAlignment.Left
 	Button.Text = "["..obj.ClassName.."] "..safeGetFullName(obj)
-	-- honeypot tint for list entry
 	local hpEarly = getHoneypotInfo(obj)
 	if hpEarly.level == "HONEYPOT" then
 		Button.BackgroundColor3 = Color3.fromRGB(65,30,35)
@@ -853,7 +841,6 @@ game.DescendantRemoving:Connect(function(obj)
 	end
 end)
 
--- search
 Search:GetPropertyChangedSignal("Text"):Connect(applyFilter)
 PlayerSearch:GetPropertyChangedSignal("Text"):Connect(buildPlayerList)
 
@@ -879,7 +866,6 @@ FilterFunc.MouseButton1Click:Connect(function()
 	applyFilter()
 end)
 
--- username box handling
 UsernameBox:GetPropertyChangedSignal("Text"):Connect(function()
 	local p = resolvePlayer(UsernameBox.Text)
 	TargetPlayer = p
@@ -914,7 +900,6 @@ Players.PlayerRemoving:Connect(function() task.wait(0.5) if TargetPlayer and not
 buildPlayerList()
 updateTargetVisual()
 
--- copy buttons
 CopyPath.MouseButton1Click:Connect(function()
 	if not Selected then notify("No remote selected") return end
 	local path = safeGetFullName(Selected)
@@ -931,12 +916,10 @@ CopyCode.MouseButton1Click:Connect(function()
 	else
 		code = 'game:GetService("ReplicatedStorage"):WaitForChild("'..Selected.Name..'"):InvokeServer('..Args.Text..') -- '..path
 	end
-	-- generate more accurate code using full path
 	local full = string.format('local remote = %s\nremote:%s(%s)', path, Selected:IsA("RemoteEvent") and "FireServer" or "InvokeServer", Args.Text)
 	if setClipboard(full) then notify("Copied code") else notify("Code: "..full) end
 end)
 
--- Honeypot shield toggle
 HoneypotToggle.MouseButton1Click:Connect(function()
 	BlockHoneypots = not BlockHoneypots
 	if BlockHoneypots then
@@ -952,10 +935,8 @@ HoneypotToggle.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Fire logic with honeypot + injection
 Run.MouseButton1Click:Connect(function()
 	if not Selected then notify("Select a remote first!") return end
-	-- honeypot check
 	local hp = getHoneypotInfo(Selected)
 	if hp.level == "HONEYPOT" and BlockHoneypots then
 		notify("⛔ BLOCKED: "..Selected.Name.." flagged as honeypot ("..table.concat(hp.reasons, ", ")..") — disable shield to fire")
@@ -989,7 +970,6 @@ Run.MouseButton1Click:Connect(function()
 	end
 	local args = ParseArgs(Args.Text)
 
-	-- injection logic for target player
 	if TargetEnabled then
 		if not TargetPlayer then
 			notify("Target toggle is ON but username invalid — firing without target")
@@ -1003,18 +983,16 @@ Run.MouseButton1Click:Connect(function()
 						args[i] = v:gsub("%$target", TargetPlayer.Name)
 					end
 				end
-				-- if no placeholder found, insert as first arg
 				local hasPlaceholder = Args.Text:find("%$target")
 				if not hasPlaceholder then table.insert(args, 1, TargetPlayer.Name) end
 			elseif mode:find("Last Arg") then
 				table.insert(args, TargetPlayer.Name)
-			else -- First Arg string
+			else
 				table.insert(args, 1, TargetPlayer.Name)
 			end
 		end
 	end
 
-	-- execute
 	local ok, err = pcall(function()
 		if Selected:IsA("RemoteEvent") then
 			Selected:FireServer(unpack(args))
@@ -1032,7 +1010,6 @@ Run.MouseButton1Click:Connect(function()
 	end
 end)
 
--- header buttons + hotkey
 CloseBtn.MouseButton1Click:Connect(function() Gui:Destroy() Shadow:Destroy() end)
 MinBtn.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
 
@@ -1044,7 +1021,6 @@ UIS.InputBegan:Connect(function(i,g)
 	end
 end)
 
--- auto canvas update
 Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 	List.CanvasSize = UDim2.new(0,0,0, Layout.AbsoluteContentSize.Y + 10)
 end)
@@ -1053,4 +1029,3 @@ PLLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 end)
 
 notify("Loaded — expensiveproblems • "..tostring(tableCount(Remotes)).." remotes found")
-
