@@ -238,7 +238,7 @@ HoneypotReason.Font = Enum.Font.Gotham
 HoneypotReason.TextSize = 9
 HoneypotReason.TextColor3 = Color3.fromRGB(160,160,170)
 HoneypotReason.TextXAlignment = Enum.TextXAlignment.Left
-HoneypotReason.TextTruncated = true
+HoneypotReason.TextTruncate = Enum.TextTruncate.AtEnd
 HoneypotReason.Visible = false
 
 local CopyPath = Instance.new("TextButton", InfoPanel)
@@ -454,7 +454,7 @@ Log.Font = Enum.Font.Gotham
 Log.TextSize = 10
 Log.TextColor3 = Color3.fromRGB(140,140,155)
 Log.TextXAlignment = Enum.TextXAlignment.Left
-Log.TextTruncated = true
+Log.TextTruncate = Enum.TextTruncate.AtEnd
 
 local Remotes = {}
 local Buttons = {}
@@ -702,7 +702,7 @@ local function buildPlayerList()
 			NameLbl.TextSize = 11
 			NameLbl.TextColor3 = Color3.new(1,1,1)
 			NameLbl.TextXAlignment = Enum.TextXAlignment.Left
-			NameLbl.TextTruncated = true
+			NameLbl.TextTruncate = Enum.TextTruncate.AtEnd
 
 			local SelDot = Instance.new("Frame", Btn)
 			SelDot.Position = UDim2.new(1, -16, 0.5, -4)
@@ -794,7 +794,7 @@ local function AddRemote(obj)
 	Button.Font = Enum.Font.Gotham
 	Button.TextSize = 12
 	Button.BorderSizePixel = 0
-	Button.TextTruncated = true
+	Button.TextTruncate = Enum.TextTruncate.AtEnd
 	Button.LayoutOrder = 0
 	Instance.new("UICorner", Button).CornerRadius = UDim.new(0, 6)
 	local Pad = Instance.new("UIPadding", Button)
