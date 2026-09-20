@@ -106,7 +106,7 @@ local Title = Instance.new("TextLabel", Header)
 Title.Size = UDim2.new(1, -120, 1, 0)
 Title.Position = UDim2.new(0, 16, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "remotes.lua  |  expensiveproblems  —  Insert to toggle"
+	Title.Text = "remotes.lua  |  expensiveproblems  —  Enter to toggle"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 14
 Title.TextColor3 = Color3.fromRGB(235,235,240)
@@ -228,9 +228,34 @@ Info.TextSize = 12
 Info.TextColor3 = Color3.fromRGB(220,220,230)
 Info.Text = "Select a remote\n\nTip: Use the Player List to target someone."
 
+local HoneypotBadge = Instance.new("TextLabel", InfoPanel)
+HoneypotBadge.Name = "HoneypotBadge"
+HoneypotBadge.Position = UDim2.new(0, 12, 0, 82)
+HoneypotBadge.Size = UDim2.new(1, -24, 0, 18)
+HoneypotBadge.BackgroundColor3 = Color3.fromRGB(38,38,48)
+HoneypotBadge.Text = "● SAFE — no honeypot signs"
+HoneypotBadge.Font = Enum.Font.GothamBold
+HoneypotBadge.TextSize = 10
+HoneypotBadge.TextColor3 = Color3.fromRGB(90,200,120)
+HoneypotBadge.BorderSizePixel = 0
+Instance.new("UICorner", HoneypotBadge).CornerRadius = UDim.new(0, 6)
+HoneypotBadge.Visible = false
+local HoneypotReason = Instance.new("TextLabel", InfoPanel)
+HoneypotReason.Name = "HoneypotReason"
+HoneypotReason.Position = UDim2.new(0, 12, 0, 102)
+HoneypotReason.Size = UDim2.new(1, -24, 0, 12)
+HoneypotReason.BackgroundTransparency = 1
+HoneypotReason.Text = ""
+HoneypotReason.Font = Enum.Font.Gotham
+HoneypotReason.TextSize = 9
+HoneypotReason.TextColor3 = Color3.fromRGB(160,160,170)
+HoneypotReason.TextXAlignment = Left
+HoneypotReason.TextTruncated = true
+HoneypotReason.Visible = false
+
 -- copy buttons row
 local CopyPath = Instance.new("TextButton", InfoPanel)
-CopyPath.Position = UDim2.new(0, 12, 0, 104)
+CopyPath.Position = UDim2.new(0, 12, 0, 118)
 CopyPath.Size = UDim2.new(0.5, -16, 0, 24)
 CopyPath.Text = "Copy Path"
 CopyPath.Font = Enum.Font.GothamBold
@@ -241,7 +266,7 @@ CopyPath.BorderSizePixel = 0
 Instance.new("UICorner", CopyPath).CornerRadius = UDim.new(0, 6)
 
 local CopyCode = Instance.new("TextButton", InfoPanel)
-CopyCode.Position = UDim2.new(0.5, 4, 0, 104)
+CopyCode.Position = UDim2.new(0.5, 4, 0, 118)
 CopyCode.Size = UDim2.new(0.5, -16, 0, 24)
 CopyCode.Text = "Copy Code"
 CopyCode.Font = Enum.Font.GothamBold
@@ -253,7 +278,7 @@ Instance.new("UICorner", CopyCode).CornerRadius = UDim.new(0, 6)
 
 -- Args
 local ArgsLabel = Instance.new("TextLabel", InfoPanel)
-ArgsLabel.Position = UDim2.new(0, 12, 0, 134)
+ArgsLabel.Position = UDim2.new(0, 12, 0, 148)
 ArgsLabel.Size = UDim2.new(1, -24, 0, 14)
 ArgsLabel.BackgroundTransparency = 1
 ArgsLabel.Text = "Arguments (comma separated, supports: \"hi\", 123, true, nil, {a=1})"
@@ -263,7 +288,7 @@ ArgsLabel.TextColor3 = Color3.fromRGB(150,150,165)
 ArgsLabel.TextXAlignment = Left
 
 local Args = Instance.new("TextBox", InfoPanel)
-Args.Position = UDim2.new(0, 12, 0, 150)
+Args.Position = UDim2.new(0, 12, 0, 164)
 Args.Size = UDim2.new(1, -24, 0, 36)
 Args.PlaceholderText = 'Example: 1, true, "hello", $target'
 Args.Text = ""
@@ -284,7 +309,7 @@ ArgsPad.PaddingTop = UDim.new(0, 6)
 
 -- === USERNAME FIELD + TOGGLE + PLAYERLIST (REQUESTED FEATURE) ===
 local TargetLabel = Instance.new("TextLabel", InfoPanel)
-TargetLabel.Position = UDim2.new(0, 12, 0, 194)
+TargetLabel.Position = UDim2.new(0, 12, 0, 208)
 TargetLabel.Size = UDim2.new(1, -24, 0, 14)
 TargetLabel.BackgroundTransparency = 1
 TargetLabel.Text = "Target Player (username field)"
@@ -295,7 +320,7 @@ TargetLabel.TextXAlignment = Left
 
 local UsernameBox = Instance.new("TextBox", InfoPanel)
 UsernameBox.Name = "UsernameBox"
-UsernameBox.Position = UDim2.new(0, 12, 0, 210)
+UsernameBox.Position = UDim2.new(0, 12, 0, 224)
 UsernameBox.Size = UDim2.new(1, -90, 0, 32)
 UsernameBox.PlaceholderText = "Username / DisplayName..."
 UsernameBox.Text = ""
@@ -316,7 +341,7 @@ UBP.PaddingLeft = UDim.new(0, 8)
 
 local TargetToggle = Instance.new("TextButton", InfoPanel)
 TargetToggle.Name = "TargetToggle"
-TargetToggle.Position = UDim2.new(1, -70, 0, 210)
+TargetToggle.Position = UDim2.new(1, -70, 0, 224)
 TargetToggle.Size = UDim2.new(0, 58, 0, 32)
 TargetToggle.Text = "OFF"
 TargetToggle.Font = Enum.Font.GothamBold
@@ -327,7 +352,7 @@ TargetToggle.BorderSizePixel = 0
 Instance.new("UICorner", TargetToggle).CornerRadius = UDim.new(0, 6)
 
 local TargetStatus = Instance.new("TextLabel", InfoPanel)
-TargetStatus.Position = UDim2.new(0, 12, 0, 244)
+TargetStatus.Position = UDim2.new(0, 12, 0, 258)
 TargetStatus.Size = UDim2.new(1, -24, 0, 12)
 TargetStatus.BackgroundTransparency = 1
 TargetStatus.Text = "Toggle ON to inject target into FireServer args"
@@ -338,7 +363,7 @@ TargetStatus.TextXAlignment = Left
 
 -- Injection mode
 local ModeLabel = Instance.new("TextLabel", InfoPanel)
-ModeLabel.Position = UDim2.new(0, 12, 0, 260)
+ModeLabel.Position = UDim2.new(0, 12, 0, 274)
 ModeLabel.Size = UDim2.new(0, 80, 0, 22)
 ModeLabel.BackgroundTransparency = 1
 ModeLabel.Text = "Inject mode:"
@@ -348,7 +373,7 @@ ModeLabel.TextColor3 = Color3.fromRGB(160,160,175)
 ModeLabel.TextXAlignment = Left
 
 local ModeButton = Instance.new("TextButton", InfoPanel)
-ModeButton.Position = UDim2.new(0, 92, 0, 260)
+ModeButton.Position = UDim2.new(0, 92, 0, 274)
 ModeButton.Size = UDim2.new(1, -104, 0, 22)
 ModeButton.Text = "First Arg = Player Name (string)"
 ModeButton.Font = Enum.Font.Gotham
@@ -360,7 +385,7 @@ Instance.new("UICorner", ModeButton).CornerRadius = UDim.new(0, 6)
 
 -- PlayerList
 local PlayerListLabel = Instance.new("TextLabel", InfoPanel)
-PlayerListLabel.Position = UDim2.new(0, 12, 0, 288)
+PlayerListLabel.Position = UDim2.new(0, 12, 0, 302)
 PlayerListLabel.Size = UDim2.new(0.5, 0, 0, 16)
 PlayerListLabel.BackgroundTransparency = 1
 PlayerListLabel.Text = "Player List (click to select)"
@@ -370,7 +395,7 @@ PlayerListLabel.TextColor3 = Color3.fromRGB(180,180,195)
 PlayerListLabel.TextXAlignment = Left
 
 local RefreshPlayers = Instance.new("TextButton", InfoPanel)
-RefreshPlayers.Position = UDim2.new(1, -70, 0, 286)
+RefreshPlayers.Position = UDim2.new(1, -70, 0, 300)
 RefreshPlayers.Size = UDim2.new(0, 58, 0, 18)
 RefreshPlayers.Text = "Refresh"
 RefreshPlayers.Font = Enum.Font.GothamBold
@@ -381,7 +406,7 @@ RefreshPlayers.BorderSizePixel = 0
 Instance.new("UICorner", RefreshPlayers).CornerRadius = UDim.new(1,0)
 
 local PlayerSearch = Instance.new("TextBox", InfoPanel)
-PlayerSearch.Position = UDim2.new(0, 12, 0, 306)
+PlayerSearch.Position = UDim2.new(0, 12, 0, 320)
 PlayerSearch.Size = UDim2.new(1, -24, 0, 24)
 PlayerSearch.PlaceholderText = "Filter players..."
 PlayerSearch.Text = ""
@@ -396,7 +421,7 @@ local PSP = Instance.new("UIPadding", PlayerSearch)
 PSP.PaddingLeft = UDim.new(0, 8)
 
 local PlayerList = Instance.new("ScrollingFrame", InfoPanel)
-PlayerList.Position = UDim2.new(0, 12, 0, 336)
+PlayerList.Position = UDim2.new(0, 12, 0, 350)
 PlayerList.Size = UDim2.new(1, -24, 0, 96)
 PlayerList.CanvasSize = UDim2.new(0,0,0,0)
 PlayerList.ScrollBarThickness = 3
@@ -413,9 +438,22 @@ PLPad.PaddingLeft = UDim.new(0, 4)
 PLPad.PaddingRight = UDim.new(0, 4)
 PLPad.PaddingBottom = UDim.new(0, 4)
 
+-- Honeypot block toggle Row (above Run)
+local HoneypotToggle = Instance.new("TextButton", InfoPanel)
+HoneypotToggle.Name = "HoneypotToggle"
+HoneypotToggle.Position = UDim2.new(0, 12, 0, 452)
+HoneypotToggle.Size = UDim2.new(1, -24, 0, 20)
+HoneypotToggle.Text = "🛡  Block honeypots: ON (tap to disable risky filter)"
+HoneypotToggle.Font = Enum.Font.GothamBold
+HoneypotToggle.TextSize = 10
+HoneypotToggle.BackgroundColor3 = Color3.fromRGB(38,78,52)
+HoneypotToggle.TextColor3 = Color3.fromRGB(140,255,170)
+HoneypotToggle.BorderSizePixel = 0
+Instance.new("UICorner", HoneypotToggle).CornerRadius = UDim.new(0, 6)
+
 -- Fire button
 local Run = Instance.new("TextButton", InfoPanel)
-Run.Position = UDim2.new(0, 12, 0, 442)
+Run.Position = UDim2.new(0, 12, 0, 476)
 Run.Size = UDim2.new(1, -24, 0, 38)
 Run.Text = "Fire / Invoke  ▶"
 Run.BackgroundColor3 = Color3.fromRGB(80,130,255)
@@ -451,7 +489,56 @@ local Modes = {
 	"Append as Last Arg (string)",
 }
 local CurrentFilter = "All"
+local safeGetFullName -- forward declare for honeypot
+local BlockHoneypots = true -- toggle honeypot protection
+local PendingConfirm = nil -- {obj = ..., untilTime = ...}
 local function tableCount(t) local c=0 for _ in pairs(t) do c+=1 end return c end
+
+local HoneypotKeywords = {"ban","kick","punish","log","cheat","exploit","detect","anticheat","byfron","flag","report","moderate","crash","shutdown","honeypot","trap","warn","jail","blacklist","antiexploit","ac6"}
+local HoneypotPathKeywords = {"admin","moderation","security","anticheat","audit","logs","ban"}
+
+local function getHoneypotInfo(obj)
+	local name = obj.Name:lower()
+	local path = ""
+	pcall(function() path = safeGetFullName(obj):lower() end)
+	local score = 0
+	local reasons = {}
+	for _,kw in ipairs(HoneypotKeywords) do
+		if name:find(kw,1,true) then
+			score += 35
+			table.insert(reasons, "name:"..kw)
+		end
+	end
+	for _,kw in ipairs(HoneypotPathKeywords) do
+		if path:find(kw,1,true) then
+			score += 25
+			table.insert(reasons, "path:"..kw)
+		end
+	end
+	-- rarely used / suspicious parent
+	if path:find("workspace") or path:find("players.") then
+		score += 10
+		table.insert(reasons, "unusual location")
+	end
+	-- generic bait names like "BanRemote" "KickEvent"
+	if name:match("^%w+remote$") and #name < 14 then
+		-- not suspicious
+	else
+		if name:len() <= 3 and name:match("^[a-z]+$") then
+			score += 8
+		end
+	end
+	-- score clamp
+	if score > 100 then score = 100 end
+	local level = "SAFE"
+	local color = Color3.fromRGB(90,200,120)
+	if score >= 60 then level = "HONEYPOT" color = Color3.fromRGB(220,60,60)
+	elseif score >= 30 then level = "RISKY" color = Color3.fromRGB(220,170,40)
+	elseif score >= 15 then level = "CAUTION" color = Color3.fromRGB(200,150,50)
+	end
+	return {score=score, level=level, color=color, reasons=reasons, path=path}
+end
+
 local function notify(txt)
 	Log.Text = txt
 	pcall(function()
@@ -463,7 +550,7 @@ local function notify(txt)
 	end)
 end
 
-local function safeGetFullName(obj)
+safeGetFullName = function(obj)
 	local ok, res = pcall(function() return obj:GetFullName() end)
 	if ok then return res end
 	-- fallback
@@ -686,7 +773,28 @@ end
 
 local function selectRemote(obj)
 	Selected = obj
+	PendingConfirm = nil
+	Run.Text = "Fire / Invoke  ▶"
+	Run.BackgroundColor3 = Color3.fromRGB(80,130,255)
+	local hp = getHoneypotInfo(obj)
 	Info.Text = "Name: "..obj.Name.."\nType: "..obj.ClassName.."\n\nPath:\n"..safeGetFullName(obj)
+	HoneypotBadge.Visible = true
+	HoneypotReason.Visible = true
+	HoneypotBadge.BackgroundColor3 = hp.level == "SAFE" and Color3.fromRGB(30,55,40) or (hp.level == "HONEYPOT" and Color3.fromRGB(70,30,35) or Color3.fromRGB(65,55,30))
+	HoneypotBadge.TextColor3 = hp.color
+	if hp.level == "SAFE" then
+		HoneypotBadge.Text = "● SAFE — no ban signs"
+		HoneypotReason.Text = ""
+	elseif hp.level == "HONEYPOT" then
+		HoneypotBadge.Text = "⛔ HONEYPOT — HIGH BAN RISK ("..hp.score..")"
+		HoneypotReason.Text = "Flagged: "..table.concat(hp.reasons, ", ")
+	elseif hp.level == "RISKY" then
+		HoneypotBadge.Text = "⚠ RISKY — requires confirm ("..hp.score..")"
+		HoneypotReason.Text = "Flagged: "..table.concat(hp.reasons, ", ")
+	else
+		HoneypotBadge.Text = "● CAUTION — "..hp.score.." — "..table.concat(hp.reasons, ", ")
+		HoneypotReason.Text = "Low risk but check args"
+	end
 	-- highlight
 	for o,b in pairs(Buttons) do
 		if o == obj then
@@ -706,8 +814,20 @@ local function AddRemote(obj)
 	Button.Size = UDim2.new(1, -6, 0, 28)
 	Button.TextXAlignment = Left
 	Button.Text = "["..obj.ClassName.."] "..safeGetFullName(obj)
-	Button.BackgroundColor3 = Color3.fromRGB(38,38,45)
-	Button.TextColor3 = Color3.fromRGB(230,230,240)
+	-- honeypot tint for list entry
+	local hpEarly = getHoneypotInfo(obj)
+	if hpEarly.level == "HONEYPOT" then
+		Button.BackgroundColor3 = Color3.fromRGB(65,30,35)
+		Button.TextColor3 = Color3.fromRGB(255,150,150)
+		Button.Text = "⛔ "..Button.Text
+	elseif hpEarly.level == "RISKY" then
+		Button.BackgroundColor3 = Color3.fromRGB(65,55,25)
+		Button.TextColor3 = Color3.fromRGB(255,220,140)
+		Button.Text = "⚠ "..Button.Text
+	else
+		Button.BackgroundColor3 = Color3.fromRGB(38,38,45)
+		Button.TextColor3 = Color3.fromRGB(230,230,240)
+	end
 	Button.Font = Enum.Font.Gotham
 	Button.TextSize = 12
 	Button.BorderSizePixel = 0
@@ -745,7 +865,15 @@ game.DescendantRemoving:Connect(function(obj)
 		Buttons[obj]:Destroy()
 		Buttons[obj] = nil
 		Remotes[obj] = nil
-		if Selected == obj then Selected = nil Info.Text = "Select a remote" end
+		if Selected == obj then 
+			Selected = nil
+			Info.Text = "Select a remote"
+			HoneypotBadge.Visible = false
+			HoneypotReason.Visible = false
+			PendingConfirm = nil
+			Run.Text = "Fire / Invoke  ▶"
+			Run.BackgroundColor3 = Color3.fromRGB(80,130,255)
+		end
 		applyFilter()
 	end
 end)
@@ -833,9 +961,57 @@ CopyCode.MouseButton1Click:Connect(function()
 	if setClipboard(full) then notify("Copied code") else notify("Code: "..full) end
 end)
 
--- Fire logic with injection
+-- Honeypot shield toggle
+HoneypotToggle.MouseButton1Click:Connect(function()
+	BlockHoneypots = not BlockHoneypots
+	if BlockHoneypots then
+		HoneypotToggle.Text = "🛡  Block honeypots: ON (tap to allow risky)"
+		HoneypotToggle.BackgroundColor3 = Color3.fromRGB(38,78,52)
+		HoneypotToggle.TextColor3 = Color3.fromRGB(140,255,170)
+		notify("Honeypot shield ON — risky remotes blocked")
+	else
+		HoneypotToggle.Text = "⚠  Block honeypots: OFF (risky allowed with confirm)"
+		HoneypotToggle.BackgroundColor3 = Color3.fromRGB(78,45,35)
+		HoneypotToggle.TextColor3 = Color3.fromRGB(255,180,140)
+		notify("Honeypot shield OFF — you must confirm risky remotes")
+	end
+end)
+
+-- Fire logic with honeypot + injection
 Run.MouseButton1Click:Connect(function()
 	if not Selected then notify("Select a remote first!") return end
+	-- honeypot check
+	local hp = getHoneypotInfo(Selected)
+	if hp.level == "HONEYPOT" and BlockHoneypots then
+		notify("⛔ BLOCKED: "..Selected.Name.." flagged as honeypot ("..table.concat(hp.reasons, ", ")..") — disable shield to fire")
+		Log.Text = "Blocked honeypot: "..Selected.Name.." — toggle shield OFF to allow"
+		Run.Text = "⛔ BLOCKED — disable shield"
+		Run.BackgroundColor3 = Color3.fromRGB(140,40,40)
+		task.delay(2, function()
+			Run.Text = "Fire / Invoke  ▶"
+			Run.BackgroundColor3 = Color3.fromRGB(80,130,255)
+		end)
+		return
+	end
+	if hp.score >= 30 then
+		if not PendingConfirm or PendingConfirm.obj ~= Selected or tick() > PendingConfirm.untilTime then
+			PendingConfirm = {obj = Selected, untilTime = tick() + 3}
+			Run.Text = "⚠ TAP AGAIN TO CONFIRM ("..hp.level..")"
+			Run.BackgroundColor3 = hp.color
+			notify(hp.level.." — "..table.concat(hp.reasons, ", ").." — tap Fire again in 3s to confirm")
+			Log.Text = "Confirm required: "..Selected.Name.." ("..hp.level..")"
+			task.delay(3, function()
+				if PendingConfirm and PendingConfirm.obj == Selected and tick() > PendingConfirm.untilTime then
+					PendingConfirm = nil
+					Run.Text = "Fire / Invoke  ▶"
+					Run.BackgroundColor3 = Color3.fromRGB(80,130,255)
+				end
+			end)
+			return
+		else
+			PendingConfirm = nil
+		end
+	end
 	local args = ParseArgs(Args.Text)
 
 	-- injection logic for target player
@@ -887,7 +1063,7 @@ MinBtn.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
 
 UIS.InputBegan:Connect(function(i,g)
 	if g then return end
-	if i.KeyCode == Enum.KeyCode.Insert or i.KeyCode == Enum.KeyCode.RightShift then
+	if i.KeyCode == Enum.KeyCode.Return or i.KeyCode == Enum.KeyCode.KeypadEnter then
 		Main.Visible = not Main.Visible
 		Shadow.Visible = Main.Visible
 	end
