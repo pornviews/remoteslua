@@ -1174,10 +1174,9 @@ local function Scan()
 	applyFilter()
 end
 
--- Spy mode: start empty, remotes added as you play
--- Scan() -- disabled initial scan, use Rescan button for all
-notify("Spy mode: list empty -- do actions in game to capture remotes + args")
-Log.Text = "Spy active -- 0 spied -- Rescan for all"
+Scan()
+notify("Loaded — expensiveproblems • "+tostring(tableCount(Remotes))+" remotes (Spy OFF)")
+Log.Text = "Loaded — "+tostring(tableCount(Remotes))+" remotes — Spy OFF (enable to capture live)"
 
 local function doRescan()
 	local before = tableCount(Remotes)
