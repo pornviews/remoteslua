@@ -652,19 +652,29 @@ local ObservedArgs = {}
 pcall(function()
 	if hookmetamethod and getnamecallmethod then
 		local old
-		old = hookmetamethod(game, "__namecall", function(self, ...)
-			local m = getnamecallmethod()
-			if (m == "FireServer" or m == "InvokeServer") and (self:IsA("RemoteEvent") or self:IsA("RemoteFunction")) then
-				ObservedArgs[self] = {...}
-				if Selected == self then
-					local types = {}
-					for _,v in ipairs(ObservedArgs[self]) do table.insert(types, typeof(v)) end
-					ArgHint.Text = "↻ Observed: ("..table.concat(types, ", ")..") - "..tostring(#ObservedArgs[self]).." args"
-					ArgHint.TextColor3 = Color3.fromRGB(110,200,160)
+		local wrapper = function(self, ...)
+			local m
+			pcall(function() m = getnamecallmethod() end)
+			if m and (m == "FireServer" or m == "InvokeServer") and typeof(self) == "Instance" then
+				local ok2 = pcall(function() return self:IsA("RemoteEvent") or self:IsA("RemoteFunction") end)
+				if ok2 and (self:IsA("RemoteEvent") or self:IsA("RemoteFunction")) then
+					if not checkcaller or not checkcaller() then
+						ObservedArgs[self] = {...}
+						if Selected == self then
+							pcall(function()
+								local types = {}
+								for _,v in ipairs(ObservedArgs[self]) do table.insert(types, typeof(v)) end
+								ArgHint.Text = "↻ Observed: ("..table.concat(types, ", ")..") - "..tostring(#ObservedArgs[self]).." args"
+								ArgHint.TextColor3 = Color3.fromRGB(110,200,160)
+							end)
+						end
+					end
 				end
 			end
 			return old(self, ...)
-		end)
+		end
+		if newcclosure then wrapper = newcclosure(wrapper) end
+		old = hookmetamethod(game, "__namecall", wrapper)
 	end
 end)
 
@@ -695,6 +705,11 @@ local function detectExpectedArgs(remote)
 	if hint and hint:find("Ban") then return hint end
 	local found={}
 	local searchName=name
+	if #found==0 and (name:lower():find("clickpower") or name:lower():find("click")) then
+		if searchName:lower():find("clickpower") then
+			return "Expects: () no args - leave Args empty (PowerClick fires with no args)"
+		end
+	end
 	if getgc and pcall(getgc) then
 		pcall(function()
 			for _,v in ipairs(getgc(true)) do
@@ -734,19 +749,13 @@ local function detectExpectedArgs(remote)
 				if ok and src and type(src)=="string" and src:find(searchName,1,true) then
 					for args in src:gmatch(searchName.."%s*:%s*FireServer%s*%((.-)%)") do
 						args=args:gsub("%s+", " "):gsub("^%s+",""):gsub("%s+$","")
-						if args~="" then table.insert(found, args:sub(1,80)) end
+						if args=="" then table.insert(found, "<no args>") else table.insert(found, args:sub(1,80)) end
 						if #found>=2 then break end
 					end
 					for args in src:gmatch(searchName.."%s*:%s*InvokeServer%s*%((.-)%)") do
 						args=args:gsub("%s+", " "):gsub("^%s+",""):gsub("%s+$","")
-						if args~="" then table.insert(found, args:sub(1,80)) end
+						if args=="" then table.insert(found, "<no args>") else table.insert(found, args:sub(1,80)) end
 						if #found>=2 then break end
-					end
-					for args in src:gmatch("FireServer%s*%((.-)%)") do
-						if src:find(searchName,1,true) and args:find("%S") then
-							table.insert(found, args:sub(1,80))
-							if #found>=2 then break end
-						end
 					end
 				end
 				if #found>=2 then break end
@@ -754,9 +763,10 @@ local function detectExpectedArgs(remote)
 		end
 	end
 	if #found>0 then
+		if found[1]=="<no args>" then return "Expects: () no args - leave Args empty (auto-detected)" end
 		return "Found in scripts: ("..found[1]..") - click to fill"
 	end
-	return "No pattern found — try: string, number, or $target. (Live capture waits for game to fire)"
+	return "No pattern found — if PowerClick: Fire with () no args. Otherwise try string/number or $target."
 end
 
 local function updateArgHint(remote)
@@ -785,12 +795,17 @@ ArgHint.MouseButton1Click:Connect(function()
 end)
 
 local function ParseArgs(text)
-	if not text or text:match("^%s*$") then return {} end
+	if not text or text:match("^%s*$") then return {}, 0 end
 	local args = {}
+	local n = 0
 	local i = 1
 	local len = #text
 	local function skipSpace()
 		while i <= len and text:sub(i,i):match("%s") do i += 1 end
+	end
+	local function push(v)
+		n += 1
+		args[n] = v
 	end
 	while i <= len do
 		skipSpace()
@@ -799,7 +814,6 @@ local function ParseArgs(text)
 		if c == '"' or c == "'" then
 			local quote = c
 			i += 1
-			local start = i
 			local str = ""
 			while i <= len do
 				local ch = text:sub(i,i)
@@ -814,7 +828,7 @@ local function ParseArgs(text)
 					i += 1
 				end
 			end
-			table.insert(args, str)
+			push(str)
 		elseif c == "{" or c == "[" then
 			local brace = c
 			local close = brace == "{" and "}" or "]"
@@ -830,36 +844,30 @@ local function ParseArgs(text)
 			local fn, err = loadstring("return "..chunk)
 			if fn then
 				local ok, tbl = pcall(fn)
-				if ok then table.insert(args, tbl) else table.insert(args, chunk) end
+				if ok then push(tbl) else push(chunk) end
 			else
-				table.insert(args, chunk)
+				push(chunk)
 			end
 		else
 			local start = i
 			while i <= len and text:sub(i,i) ~= "," do i+=1 end
 			local part = text:sub(start, i-1):match("^%s*(.-)%s*$")
 			if part ~= "" then
-				if part == "nil" then table.insert(args, nil)
-				elseif part == "true" then table.insert(args, true)
-				elseif part == "false" then table.insert(args, false)
-				elseif tonumber(part) then table.insert(args, tonumber(part))
+				if part == "nil" then push(nil)
+				elseif part == "true" then push(true)
+				elseif part == "false" then push(false)
+				elseif tonumber(part) then push(tonumber(part))
 				elseif part == "$target" and TargetEnabled and TargetPlayer then
-					table.insert(args, TargetPlayer.Name)
+					push(TargetPlayer.Name)
 				else
-					table.insert(args, part)
+					push(part)
 				end
 			end
 		end
 		skipSpace()
 		if i <= len and text:sub(i,i) == "," then i+=1 end
 	end
-	if text:find("nil") then
-		local rawParts = {}
-		for p in string.gmatch(text, "[^,]+") do table.insert(rawParts, p:match("^%s*(.-)%s*$")) end
-		if #rawParts == #args + select(2, text:gsub("nil","")) - select(2, text:gsub("nil","")) then
-		end
-	end
-	return args
+	return args, n
 end
 
 local function resolvePlayer(query)
@@ -1280,41 +1288,54 @@ Run.MouseButton1Click:Connect(function()
 			PendingConfirm = nil
 		end
 	end
-	local args = ParseArgs(Args.Text)
-
-	if TargetEnabled then
-		if not TargetPlayer then
-			notify("Target toggle is ON but username invalid — firing without target")
-		else
-			local mode = Modes[ModeIndex]
-			if mode:find("Player Object") then
-				table.insert(args, 1, TargetPlayer)
-			elseif mode:find("Replace %$target") then
-				for i,v in ipairs(args) do
-					if type(v)=="string" and v:find("%$target") then
-						args[i] = v:gsub("%$target", TargetPlayer.Name)
-					end
-				end
-				local hasPlaceholder = Args.Text:find("%$target")
-				if not hasPlaceholder then table.insert(args, 1, TargetPlayer.Name) end
-			elseif mode:find("Last Arg") then
-				table.insert(args, TargetPlayer.Name)
+	local args, n = ParseArgs(Args.Text)
+	if Selected.Name:lower():find("clickpower") and n == 0 then
+		if TargetEnabled then
+			notify("ClickPower takes 0 args — skipping target injection")
+		end
+	else
+		if TargetEnabled then
+			if not TargetPlayer then
+				notify("Target toggle is ON but username invalid — firing without target")
 			else
-				table.insert(args, 1, TargetPlayer.Name)
+				local mode = Modes[ModeIndex]
+				if mode:find("Player Object") then
+					table.insert(args, 1, TargetPlayer)
+					n += 1
+				elseif mode:find("Replace %$target") then
+					local replaced=false
+					for i=1,n do
+						local v=args[i]
+						if type(v)=="string" and v:find("%$target") then
+							args[i] = v:gsub("%$target", TargetPlayer.Name)
+							replaced=true
+						end
+					end
+					if not replaced then
+						table.insert(args, 1, TargetPlayer.Name)
+						n += 1
+					end
+				elseif mode:find("Last Arg") then
+					n += 1
+					args[n] = TargetPlayer.Name
+				else
+					table.insert(args, 1, TargetPlayer.Name)
+					n += 1
+				end
 			end
 		end
 	end
-
+	local unpackFn = table.unpack or unpack
 	local ok, err = pcall(function()
 		if Selected:IsA("RemoteEvent") then
-			Selected:FireServer(unpack(args))
+			Selected:FireServer(unpackFn(args, 1, n))
 		elseif Selected:IsA("RemoteFunction") then
-			Selected:InvokeServer(unpack(args))
+			Selected:InvokeServer(unpackFn(args, 1, n))
 		end
 	end)
 	if ok then
-		local targetInfo = (TargetEnabled and TargetPlayer) and (" → "..TargetPlayer.Name) or ""
-		notify("Fired: "..Selected.Name..targetInfo.." ["..tostring(#args).." args]")
+		local targetInfo = (TargetEnabled and TargetPlayer and not Selected.Name:lower():find("clickpower")) and (" → "..TargetPlayer.Name) or ""
+		notify("Fired: "..Selected.Name..targetInfo.." ["..tostring(n).." args]")
 		Log.Text = "Last: "..Selected.Name.." ("..Selected.ClassName..") fired at "..os.date("%X")..targetInfo
 	else
 		notify("Error: "..tostring(err))
