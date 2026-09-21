@@ -1139,11 +1139,10 @@ task.spawn(function()
 	end
 end)
 
-game.DescendantAdded:Connect(function(obj)
-	if obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") then
-		AddRemote(obj)
-	end
-end)
+-- Spy: DescendantAdded disabled — remotes only appear when spied (hook)
+-- game.DescendantAdded:Connect(function(obj)
+-- 	if obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") then AddRemote(obj) end
+-- end)
 
 game.DescendantRemoving:Connect(function(obj)
 	if Remotes[obj] and Buttons[obj] then
