@@ -1195,8 +1195,8 @@ local function Scan()
 end
 
 Scan()
-notify("Loaded — expensiveproblems • "+tostring(tableCount(Remotes))+" remotes (Spy OFF)")
-Log.Text = "Loaded — "+tostring(tableCount(Remotes))+" remotes — Spy OFF (enable to capture live)"
+notify("Loaded — expensiveproblems • "..tostring(tableCount(Remotes)).." remotes (Spy OFF)")
+Log.Text = "Loaded — "..tostring(tableCount(Remotes)).." remotes — Spy OFF (enable to capture live)"
 
 local function doRescan()
 	local before = tableCount(Remotes)
