@@ -202,6 +202,42 @@ CountLabel.TextSize = 12
 CountLabel.TextColor3 = Color3.fromRGB(160,160,170)
 CountLabel.TextXAlignment = Enum.TextXAlignment.Right
 
+local RescanBtn = Instance.new("TextButton", Main)
+RescanBtn.Position = UDim2.new(0, 270, 0, 94)
+RescanBtn.Size = UDim2.new(0, 60, 0, 22)
+RescanBtn.Text = "↻ Rescan"
+RescanBtn.Font = Enum.Font.GothamBold
+RescanBtn.TextSize = 11
+RescanBtn.BackgroundColor3 = Color3.fromRGB(38,38,48)
+RescanBtn.TextColor3 = Color3.fromRGB(200,200,210)
+RescanBtn.BorderSizePixel = 0
+Instance.new("UICorner", RescanBtn).CornerRadius = UDim.new(1,0)
+
+local IntervalBox = Instance.new("TextBox", Main)
+IntervalBox.Position = UDim2.new(0, 335, 0, 94)
+IntervalBox.Size = UDim2.new(0, 36, 0, 22)
+IntervalBox.Text = "5"
+IntervalBox.PlaceholderText = "s"
+IntervalBox.Font = Enum.Font.Gotham
+IntervalBox.TextSize = 11
+IntervalBox.BackgroundColor3 = Color3.fromRGB(33,33,40)
+IntervalBox.TextColor3 = Color3.new(1,1,1)
+IntervalBox.BorderSizePixel = 0
+Instance.new("UICorner", IntervalBox).CornerRadius = UDim.new(0, 6)
+local IntervalPad = Instance.new("UIPadding", IntervalBox)
+IntervalPad.PaddingLeft = UDim.new(0, 4)
+
+local AutoToggle = Instance.new("TextButton", Main)
+AutoToggle.Position = UDim2.new(0, 376, 0, 94)
+AutoToggle.Size = UDim2.new(0, 44, 0, 22)
+AutoToggle.Text = "Auto: OFF"
+AutoToggle.Font = Enum.Font.GothamBold
+AutoToggle.TextSize = 10
+AutoToggle.BackgroundColor3 = Color3.fromRGB(60,60,70)
+AutoToggle.TextColor3 = Color3.new(1,1,1)
+AutoToggle.BorderSizePixel = 0
+Instance.new("UICorner", AutoToggle).CornerRadius = UDim.new(1,0)
+
 local List = Instance.new("ScrollingFrame", Main)
 List.Position = UDim2.new(0, 14, 0, 122)
 List.Size = UDim2.new(0.48, -14, 1, -136)
@@ -312,16 +348,18 @@ local ArgsPad = Instance.new("UIPadding", Args)
 ArgsPad.PaddingLeft = UDim.new(0, 8)
 ArgsPad.PaddingTop = UDim.new(0, 6)
 
-local ArgHint = Instance.new("TextLabel", InfoPanel)
+local ArgHint = Instance.new("TextButton", InfoPanel)
 ArgHint.Name = "ArgHint"
 ArgHint.Position = UDim2.new(0, 12, 0, 202)
 ArgHint.Size = UDim2.new(1, -24, 0, 14)
 ArgHint.BackgroundTransparency = 1
-ArgHint.Text = "Detecting expected args..."
+ArgHint.Text = "Detecting expected args... (click to fill)"
 ArgHint.Font = Enum.Font.Gotham
 ArgHint.TextSize = 9
 ArgHint.TextColor3 = Color3.fromRGB(150,150,165)
 ArgHint.TextXAlignment = Enum.TextXAlignment.Left
+ArgHint.AutoButtonColor = false
+ArgHint.BorderSizePixel = 0
 ArgHint.TextTruncate = Enum.TextTruncate.AtEnd
 
 local TargetLabel = Instance.new("TextLabel", InfoPanel)
@@ -503,6 +541,8 @@ local CurrentFilter = "All"
 local safeGetFullName
 local BlockHoneypots = true
 local PendingConfirm = nil
+local RescanInterval = 5
+local AutoRescanEnabled = false
 local function tableCount(t) local c=0 for _ in pairs(t) do c+=1 end return c end
 
 local HoneypotKeywords = {"ban","kick","punish","log","cheat","exploit","detect","anticheat","byfron","flag","report","moderate","crash","shutdown","honeypot","trap","warn","jail","blacklist","antiexploit","ac6"}
@@ -527,6 +567,15 @@ local function isUselessRemote(obj)
 	if obj:IsDescendantOf(game:GetService("CoreGui")) then return true end
 	local ok2 = pcall(function() return obj:IsDescendantOf(game:GetService("RobloxReplicatedStorage")) end)
 	if ok2 and obj:IsDescendantOf(game:GetService("RobloxReplicatedStorage")) then return true end
+	return false
+end
+local function isKickBanRemote(obj)
+	local ok, path = pcall(function() return safeGetFullName(obj) end)
+	if not ok then path = obj.Name end
+	local n = obj.Name:lower()
+	path = path:lower()
+	if n:find("kick",1,true) or n:find("ban",1,true) then return true, "name:"..(n:find("kick",1,true) and "kick" or "ban") end
+	if path:find("kick",1,true) or path:find("ban",1,true) then return true, "path:"..(path:find("kick",1,true) and "kick" or "ban") end
 	return false
 end
 
@@ -633,37 +682,81 @@ end
 local function detectExpectedArgs(remote)
 	if ObservedArgs[remote] then
 		local types={}
-		for _,v in ipairs(ObservedArgs[remote]) do table.insert(types, typeof(v)) end
-		return "↻ Live: ("..table.concat(types, ", ")..") - captured from game"
+		local vals={}
+		for _,v in ipairs(ObservedArgs[remote]) do table.insert(types, typeof(v)) table.insert(vals, tostring(v):sub(1,30)) end
+		return "↻ Live: ("..table.concat(types, ", ")..") vals: ("..table.concat(vals, ", ")..") - click to fill"
 	end
 	local name=remote.Name
 	local hint=inferHintFromName(name)
-	if hint then return hint end
+	if hint and not hint:find("Ban") then
+		local liveHint = hint.." - click ArgHint to try"
+		return liveHint
+	end
+	if hint and hint:find("Ban") then return hint end
 	local found={}
 	local searchName=name
-	for _,v in ipairs(game:GetDescendants()) do
-		if v:IsA("LocalScript") or v:IsA("Script") or v:IsA("ModuleScript") then
-			local ok, src = pcall(function()
-				if decompile then return decompile(v) end
-				return nil
-			end)
-			if ok and src and type(src)=="string" and src:find(searchName,1,true) then
-				for args in src:gmatch(searchName.."%s*:%s*FireServer%s*%((.-)%)") do
-					table.insert(found, args:gsub("%s+", " "):sub(1,80))
-					if #found>=2 then break end
-				end
-				for args in src:gmatch(searchName.."%s*:%s*InvokeServer%s*%((.-)%)") do
-					table.insert(found, args:gsub("%s+", " "):sub(1,80))
-					if #found>=2 then break end
+	if getgc and pcall(getgc) then
+		pcall(function()
+			for _,v in ipairs(getgc(true)) do
+				if type(v)=="function" then
+					local ok, src = pcall(function()
+						if debug and debug.getconstants then return debug.getconstants(v) end
+						return nil
+					end)
+					if ok and src and type(src)=="table" then
+						for _,c in ipairs(src) do
+							if type(c)=="string" and c==searchName then
+								local ok2, proto = pcall(function() return debug.getinfo(v) end)
+								if ok2 and proto then
+									table.insert(found, "func:"..tostring(proto.name or "anon"))
+									if #found>=1 then break end
+								end
+							end
+						end
+					end
+					if #found>=1 then break end
+				elseif type(v)=="table" then
+					if rawget(v, "FireServer") or rawget(v, searchName) then
+						table.insert(found, "table ref")
+						if #found>=1 then break end
+					end
 				end
 			end
-			if #found>=2 then break end
+		end)
+	end
+	if #found==0 then
+		for _,v in ipairs(game:GetDescendants()) do
+			if v:IsA("LocalScript") or v:IsA("Script") or v:IsA("ModuleScript") then
+				local ok, src = pcall(function()
+					if decompile then return decompile(v) end
+					return nil
+				end)
+				if ok and src and type(src)=="string" and src:find(searchName,1,true) then
+					for args in src:gmatch(searchName.."%s*:%s*FireServer%s*%((.-)%)") do
+						args=args:gsub("%s+", " "):gsub("^%s+",""):gsub("%s+$","")
+						if args~="" then table.insert(found, args:sub(1,80)) end
+						if #found>=2 then break end
+					end
+					for args in src:gmatch(searchName.."%s*:%s*InvokeServer%s*%((.-)%)") do
+						args=args:gsub("%s+", " "):gsub("^%s+",""):gsub("%s+$","")
+						if args~="" then table.insert(found, args:sub(1,80)) end
+						if #found>=2 then break end
+					end
+					for args in src:gmatch("FireServer%s*%((.-)%)") do
+						if src:find(searchName,1,true) and args:find("%S") then
+							table.insert(found, args:sub(1,80))
+							if #found>=2 then break end
+						end
+					end
+				end
+				if #found>=2 then break end
+			end
 		end
 	end
 	if #found>0 then
-		return "Found in scripts: ("..found[1]..")"
+		return "Found in scripts: ("..found[1]..") - click to fill"
 	end
-	return "No pattern found — try: string, number, or $target. Use 'Copy Code' and inspect."
+	return "No pattern found — try: string, number, or $target. (Live capture waits for game to fire)"
 end
 
 local function updateArgHint(remote)
@@ -681,6 +774,15 @@ local function updateArgHint(remote)
 		end
 	end)
 end
+ArgHint.MouseButton1Click:Connect(function()
+	local t = ArgHint.Text
+	local inside = t:match("%((.-)%)")
+	if inside and inside:match("%S") and not inside:find("Live:") then
+		if inside:find("vals:") then inside = t:match("vals:%s*%((.-)%)") or inside end
+		Args.Text = inside
+		notify("Filled args from detection: "..inside)
+	end
+end)
 
 local function ParseArgs(text)
 	if not text or text:match("^%s*$") then return {} end
@@ -875,26 +977,43 @@ end
 local function selectRemote(obj)
 	Selected = obj
 	PendingConfirm = nil
-	Run.Text = "Fire / Invoke  ▶"
-	Run.BackgroundColor3 = Color3.fromRGB(80,130,255)
+	local isKB, why = isKickBanRemote(obj)
+	if isKB then
+		Run.Text = "⛔ KICK/BAN — BLOCKED"
+		Run.BackgroundColor3 = Color3.fromRGB(110,20,20)
+		Run.AutoButtonColor = false
+	else
+		Run.Text = "Fire / Invoke  ▶"
+		Run.BackgroundColor3 = Color3.fromRGB(80,130,255)
+		Run.AutoButtonColor = true
+	end
 	local hp = getHoneypotInfo(obj)
 	Info.Text = "Name: "..obj.Name.."\nType: "..obj.ClassName.."\n\nPath:\n"..safeGetFullName(obj)
 	HoneypotBadge.Visible = true
 	HoneypotReason.Visible = true
-	HoneypotBadge.BackgroundColor3 = hp.level == "SAFE" and Color3.fromRGB(30,55,40) or (hp.level == "HONEYPOT" and Color3.fromRGB(70,30,35) or Color3.fromRGB(65,55,30))
-	HoneypotBadge.TextColor3 = hp.color
-	if hp.level == "SAFE" then
-		HoneypotBadge.Text = "● SAFE — no ban signs"
-		HoneypotReason.Text = ""
-	elseif hp.level == "HONEYPOT" then
-		HoneypotBadge.Text = "⛔ HONEYPOT — HIGH BAN RISK ("..hp.score..")"
-		HoneypotReason.Text = "Flagged: "..table.concat(hp.reasons, ", ")
-	elseif hp.level == "RISKY" then
-		HoneypotBadge.Text = "⚠ RISKY — requires confirm ("..hp.score..")"
-		HoneypotReason.Text = "Flagged: "..table.concat(hp.reasons, ", ")
+	if isKB then
+		HoneypotBadge.BackgroundColor3 = Color3.fromRGB(90,15,15)
+		HoneypotBadge.TextColor3 = Color3.fromRGB(255,90,90)
+		HoneypotBadge.Text = "⛔ KICK/BAN — PERMANENTLY BLOCKED ("..why..")"
+		HoneypotReason.Text = "Kick/Ban remotes are never fireable — anti-ban protection"
+		HoneypotBadge.Visible = true
+		HoneypotReason.Visible = true
 	else
-		HoneypotBadge.Text = "● CAUTION — "..hp.score.." — "..table.concat(hp.reasons, ", ")
-		HoneypotReason.Text = "Low risk but check args"
+		HoneypotBadge.BackgroundColor3 = hp.level == "SAFE" and Color3.fromRGB(30,55,40) or (hp.level == "HONEYPOT" and Color3.fromRGB(70,30,35) or Color3.fromRGB(65,55,30))
+		HoneypotBadge.TextColor3 = hp.color
+		if hp.level == "SAFE" then
+			HoneypotBadge.Text = "● SAFE — no ban signs"
+			HoneypotReason.Text = ""
+		elseif hp.level == "HONEYPOT" then
+			HoneypotBadge.Text = "⛔ HONEYPOT — HIGH BAN RISK ("..hp.score..")"
+			HoneypotReason.Text = "Flagged: "..table.concat(hp.reasons, ", ")
+		elseif hp.level == "RISKY" then
+			HoneypotBadge.Text = "⚠ RISKY — requires confirm ("..hp.score..")"
+			HoneypotReason.Text = "Flagged: "..table.concat(hp.reasons, ", ")
+		else
+			HoneypotBadge.Text = "● CAUTION — "..hp.score.." — "..table.concat(hp.reasons, ", ")
+			HoneypotReason.Text = "Low risk but check args"
+		end
 	end
 	updateArgHint(obj)
 	for o,b in pairs(Buttons) do
@@ -916,8 +1035,13 @@ local function AddRemote(obj)
 	Button.Size = UDim2.new(1, -6, 0, 28)
 	Button.TextXAlignment = Enum.TextXAlignment.Left
 	Button.Text = "["..obj.ClassName.."] "..safeGetFullName(obj)
+	local isKB = isKickBanRemote(obj)
 	local hpEarly = getHoneypotInfo(obj)
-	if hpEarly.level == "HONEYPOT" then
+	if isKB then
+		Button.BackgroundColor3 = Color3.fromRGB(85,15,15)
+		Button.TextColor3 = Color3.fromRGB(255,110,110)
+		Button.Text = "⛔ KICK/BAN "..Button.Text
+	elseif hpEarly.level == "HONEYPOT" then
 		Button.BackgroundColor3 = Color3.fromRGB(65,30,35)
 		Button.TextColor3 = Color3.fromRGB(255,150,150)
 		Button.Text = "⛔ "..Button.Text
@@ -955,6 +1079,47 @@ end
 
 Scan()
 
+local function doRescan()
+	local before = tableCount(Remotes)
+	Scan()
+	local after = tableCount(Remotes)
+	notify("Rescanned — "..after.." remotes ("..(after-before>=0 and "+"..(after-before) or tostring(after-before)).." new)")
+end
+RescanBtn.MouseButton1Click:Connect(doRescan)
+IntervalBox.FocusLost:Connect(function(enter)
+	if enter then
+		local n = tonumber(IntervalBox.Text)
+		if n and n >= 1 and n <= 60 then
+			RescanInterval = n
+			IntervalBox.BackgroundColor3 = Color3.fromRGB(33,33,40)
+			notify("Rescan interval: "..n.."s")
+		else
+			IntervalBox.BackgroundColor3 = Color3.fromRGB(70,30,35)
+			notify("Interval 1-60s only")
+		end
+	end
+end)
+AutoToggle.MouseButton1Click:Connect(function()
+	AutoRescanEnabled = not AutoRescanEnabled
+	if AutoRescanEnabled then
+		AutoToggle.Text = "Auto: ON"
+		AutoToggle.BackgroundColor3 = Color3.fromRGB(45,160,90)
+		notify("Auto-rescan ON every "..RescanInterval.."s")
+	else
+		AutoToggle.Text = "Auto: OFF"
+		AutoToggle.BackgroundColor3 = Color3.fromRGB(60,60,70)
+		notify("Auto-rescan OFF")
+	end
+end)
+task.spawn(function()
+	while true do
+		task.wait(RescanInterval)
+		if AutoRescanEnabled then
+			pcall(doRescan)
+		end
+	end
+end)
+
 game.DescendantAdded:Connect(function(obj)
 	if obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") then
 		AddRemote(obj)
@@ -974,6 +1139,8 @@ game.DescendantRemoving:Connect(function(obj)
 			PendingConfirm = nil
 			Run.Text = "Fire / Invoke  ▶"
 			Run.BackgroundColor3 = Color3.fromRGB(80,130,255)
+			Run.AutoButtonColor = true
+			ArgHint.Text = "Select a remote to detect args"
 		end
 		applyFilter()
 	end
@@ -1075,6 +1242,13 @@ end)
 
 Run.MouseButton1Click:Connect(function()
 	if not Selected then notify("Select a remote first!") return end
+	local isKB, why = isKickBanRemote(Selected)
+	if isKB then
+		notify("⛔ BLOCKED: Kick/Ban remote ("..why..") — firing permanently disabled")
+		Log.Text = "Blocked kick/ban: "..Selected.Name.." ("..why..") — protected"
+		Run.Text = "⛔ KICK/BAN BLOCKED"
+		return
+	end
 	local hp = getHoneypotInfo(Selected)
 	if hp.level == "HONEYPOT" and BlockHoneypots then
 		notify("⛔ BLOCKED: "..Selected.Name.." flagged as honeypot ("..table.concat(hp.reasons, ", ")..") — disable shield to fire")
