@@ -674,8 +674,6 @@ local ObservedArgs = {}
 local function inferHintFromName(name)
 	name=name:lower()
 	if name:find("kick") or name:find("ban") then return "⚠ Ban remote - do not fire" end
-	if name:find("level") or name:find("lvl") then return "LevelUp: Expects (number level) - CHANGE: level number. Possible: 1, 10, 50, 99, 100, 999, 1000. Try: 100 — click to fill" end
-	if name:find("xp") or name:find("exp") then return "XP: Expects (number amount) - CHANGE: xp amount. Possible: 100, 1000, 9999. Try: 1000" end
 	return nil
 end
 local function argToString(v)
@@ -683,98 +681,105 @@ local function argToString(v)
 	if t=="string" then return string.format("%q", v)
 	elseif t=="Vector3" then return string.format("Vector3.new(%g,%g,%g)", v.X, v.Y, v.Z)
 	elseif t=="CFrame" then return "CFrame.new(...)"
-	elseif t=="Instance" then return v:GetFullName()
+	elseif t=="Instance" then return pcall(function() return v:GetFullName() end) and v:GetFullName() or tostring(v)
 	else return tostring(v) end
+end
+local function findAliasNames(src, remoteName)
+	local aliases={}
+	for var in src:gmatch("local%s+([%w_]+)%s*=%s*[^\n]-WaitForChild%(%s*["']"..remoteName.."["']%s*%)") do
+		table.insert(aliases, var)
+	end
+	for var in src:gmatch("([%w_]+)%s*=%s*[^\n]-WaitForChild%(%s*["']"..remoteName.."["']%s*%)") do
+		if not table.find(aliases, var) then table.insert(aliases, var) end
+	end
+	-- also direct indexing: PowerRemotes.ClickPower
+	table.insert(aliases, remoteName)
+	return aliases
+end
+if not table.find then
+	function table.find(t,v) for _,x in ipairs(t) do if x==v then return true end end return false end
 end
 
 local function detectExpectedArgs(remote)
-	-- figure out automatically: prioritize live spy, then decompile, not name heuristics
-	if remote.Name:lower():find("level") or remote.Name:lower():find("lvl") then
-		if ObservedArgs[remote] then
-			local types={}
-			local vals={}
-			for _,v in ipairs(ObservedArgs[remote]) do table.insert(types, typeof(v)) table.insert(vals, tostring(v):sub(1,30)) end
-			return "↻ Live LevelUp: ("..table.concat(types, ", ")..") vals: ("..table.concat(vals, ", ")..") - CHANGE level number — Possible: 1, 50, 100, 999 — click to fill"
+	-- WAY BETTER: live spy > alias-aware decompile > getgc > heuristics, figures out without knowing
+	if ObservedArgs[remote] and #ObservedArgs[remote] > 0 then
+		local types, vals, preview = {}, {}, {}
+		for _,v in ipairs(ObservedArgs[remote]) do
+			table.insert(types, typeof(v))
+			table.insert(vals, argToString(v))
+			table.insert(preview, typeof(v)..":"..tostring(v):sub(1,20))
 		end
-		return "LevelUp: Expects (number level) - CHANGE: level number. Possible: 1, 10, 50, 99, 100, 999 — Found in game: fires with (level). Click ArgHint to fill 100"
+		local sig = "("..table.concat(types, ", ")..")"
+		local ex = "("..table.concat(vals, ", ")..")"
+		local what = "CHANGE: "..table.concat(preview, " | ")
+		return "↻ Live captured "..sig.." — "..what.." — vals "..ex.." — click to fill (do action again to update)"
 	end
-	if ObservedArgs[remote] then
-		local types={}
-		local vals={}
-		for _,v in ipairs(ObservedArgs[remote]) do table.insert(types, typeof(v)) table.insert(vals, tostring(v):sub(1,30)) end
-		return "↻ Live: ("..table.concat(types, ", ")..") vals: ("..table.concat(vals, ", ")..") - click to fill"
+	if ObservedArgs[remote] and #ObservedArgs[remote]==0 then
+		return "Expects: () no args — leave Args empty (live captured 0 args) — click to fill empty"
 	end
-	local name=remote.Name
-	local hint=inferHintFromName(name)
-	if hint and not hint:find("Ban") then
-		local liveHint = hint.." - click ArgHint to try"
-		return liveHint
-	end
-	if hint and hint:find("Ban") then return hint end
-	local found={}
-	local searchName=name
-	if #found==0 and (name:lower():find("clickpower") or name:lower():find("click")) then
-		if searchName:lower():find("clickpower") then
-			return "Expects: () no args - leave Args empty (PowerClick fires with no args)"
+	-- alias-aware deep decompile scan
+	local searchName = remote.Name
+	local examples = {}
+	local tried = 0
+	for _,v in ipairs(game:GetDescendants()) do
+		if v:IsA("LocalScript") or v:IsA("Script") or v:IsA("ModuleScript") then
+			local ok, src = pcall(function() if decompile then return decompile(v) end return nil end)
+			if ok and src and type(src)=="string" and #src>30 and src:find(searchName,1,true) then
+				local aliases = findAliasNames(src, searchName)
+				for _,alias in ipairs(aliases) do
+					for args in src:gmatch(alias.."%s*:%s*FireServer%s*%((.-)%)") do
+						args=args:gsub("%s+", " "):gsub("^%s+",""):gsub("%s+$","")
+						if args=="" then args="<no args>" end
+						table.insert(examples, {alias=alias, args=args, script=v:GetFullName()})
+						if #examples>=3 then break end
+					end
+					for args in src:gmatch(alias.."%s*:%s*InvokeServer%s*%((.-)%)") do
+						args=args:gsub("%s+", " "):gsub("^%s+",""):gsub("%s+$","")
+						if args=="" then args="<no args>" end
+						table.insert(examples, {alias=alias, args=args, script=v:GetFullName()})
+						if #examples>=3 then break end
+					end
+					if #examples>=3 then break end
+				end
+			end
+			if #examples>=3 then break end
+			tried+=1
+			if tried>120 then break end
 		end
 	end
-	if getgc and pcall(getgc) then
+	if #examples>0 then
+		local e = examples[1]
+		if e.args=="<no args>" then return "Expects: () no args — leave Args empty (found in "..e.script:match("[^.]+$")..") — click to fill empty" end
+		local typeHints={}
+		for part in e.args:gmatch("[^,]+") do
+			part=part:match("^%s*(.-)%s*$")
+			if part:match('^["\']') then table.insert(typeHints, "string")
+			elseif part:match("^Vector3") or part:match("^CFrame") then table.insert(typeHints, part:match("^%w+"))
+			elseif tonumber(part) then table.insert(typeHints, "number")
+			elseif part=="true" or part=="false" then table.insert(typeHints, "boolean")
+			elseif part:match("^nil") then table.insert(typeHints, "nil")
+			else table.insert(typeHints, "var:"..part:sub(1,12)) end
+		end
+		return "Found in "..e.script:match("[^.]+$").." via "..e.alias..": ("..e.args..") => ("..table.concat(typeHints, ", ")..") — CHANGE: "..e.args.." — Possible: try same types with different values — click to fill"
+	end
+	if getgc then
+		local gcFound={}
 		pcall(function()
 			for _,v in ipairs(getgc(true)) do
 				if type(v)=="function" then
-					local ok, src = pcall(function()
-						if debug and debug.getconstants then return debug.getconstants(v) end
-						return nil
-					end)
-					if ok and src and type(src)=="table" then
-						for _,c in ipairs(src) do
-							if type(c)=="string" and c==searchName then
-								local ok2, proto = pcall(function() return debug.getinfo(v) end)
-								if ok2 and proto then
-									table.insert(found, "func:"..tostring(proto.name or "anon"))
-									if #found>=1 then break end
-								end
-							end
-						end
-					end
-					if #found>=1 then break end
-				elseif type(v)=="table" then
-					if rawget(v, "FireServer") or rawget(v, searchName) then
-						table.insert(found, "table ref")
-						if #found>=1 then break end
+					local ok, consts = pcall(function() if debug and debug.getconstants then return debug.getconstants(v) end end)
+					if ok and consts then
+						for _,c in ipairs(consts) do if c==searchName then table.insert(gcFound, "const") break end end
 					end
 				end
+				if #gcFound>0 then break end
 			end
 		end)
+		if #gcFound>0 then return "Referenced in GC — enable Spy ON and do action that triggers '"..searchName.."' to capture live args" end
 	end
-	if #found==0 then
-		for _,v in ipairs(game:GetDescendants()) do
-			if v:IsA("LocalScript") or v:IsA("Script") or v:IsA("ModuleScript") then
-				local ok, src = pcall(function()
-					if decompile then return decompile(v) end
-					return nil
-				end)
-				if ok and src and type(src)=="string" and src:find(searchName,1,true) then
-					for args in src:gmatch(searchName.."%s*:%s*FireServer%s*%((.-)%)") do
-						args=args:gsub("%s+", " "):gsub("^%s+",""):gsub("%s+$","")
-						if args=="" then table.insert(found, "<no args>") else table.insert(found, args:sub(1,80)) end
-						if #found>=2 then break end
-					end
-					for args in src:gmatch(searchName.."%s*:%s*InvokeServer%s*%((.-)%)") do
-						args=args:gsub("%s+", " "):gsub("^%s+",""):gsub("%s+$","")
-						if args=="" then table.insert(found, "<no args>") else table.insert(found, args:sub(1,80)) end
-						if #found>=2 then break end
-					end
-				end
-				if #found>=2 then break end
-			end
-		end
-	end
-	if #found>0 then
-		if found[1]=="<no args>" then return "Expects: () no args - leave Args empty (auto-detected)" end
-		return "Found in scripts: ("..found[1]..") - click to fill"
-	end
-	return "Unknown args — spy waiting: do an action in game that triggers '"..remote.Name.."' to capture live args. Then click ArgHint to fill. Try common: 1, \"test\", true"
+	local hint = inferHintFromName(searchName)
+	if hint then return hint.." (heuristic) — click to fill, or do action to capture live" end
+	return "Unknown — figuring out: enable Spy ON, do an action that triggers '"..searchName.."' in game to capture live args. Detected 0 decompile refs. Try common: 1, \"test\", true, Vector3 — will show live types when captured"
 end
 
 local function updateArgHint(remote)
@@ -1097,6 +1102,7 @@ end
 
 local SpyEnabled = false
 local SpyHookOld = nil
+-- Minimal spy: only stores args, no UI work inside __namecall to avoid break
 local function setSpy(enabled)
 	SpyEnabled = enabled
 	if enabled and not SpyHookOld and hookmetamethod and getnamecallmethod then
@@ -1104,24 +1110,19 @@ local function setSpy(enabled)
 			local wrapper = function(self, ...)
 				local m
 				pcall(function() m = getnamecallmethod() end)
-				if SpyEnabled and m and (m == "FireServer" or m == "InvokeServer") and typeof(self) == "Instance" then
-					local ok2 = pcall(function() return self:IsA("RemoteEvent") or self:IsA("RemoteFunction") end)
-					if ok2 and (self:IsA("RemoteEvent") or self:IsA("RemoteFunction")) then
-						if not checkcaller or not checkcaller() then
+				-- ultra-minimal: only if SpyEnabled and valid remote, no IsA heavy checks, no UI
+				if SpyEnabled and m and (m == "FireServer" or m == "InvokeServer") then
+					local isRemote = false
+					pcall(function() isRemote = typeof(self)=="Instance" and (self:IsA("RemoteEvent") or self:IsA("RemoteFunction")) end)
+					if isRemote then
+						-- only capture if not from our own script
+						local fromUs = false
+						pcall(function() if checkcaller then fromUs = checkcaller() end end)
+						if not fromUs then
 							ObservedArgs[self] = {...}
+							-- don't call AddRemote or UI here (breaks) — queue for main thread
 							if not Remotes[self] then
-								pcall(function() AddRemote(self) end)
-							end
-							if Selected == self then
-								pcall(function()
-									local types = {}
-									for _,v in ipairs(ObservedArgs[self]) do table.insert(types, typeof(v)) end
-									ArgHint.Text = "↻ Observed: ("..table.concat(types, ", ")..") - "..tostring(#ObservedArgs[self]).." args — click to fill"
-									ArgHint.TextColor3 = Color3.fromRGB(110,200,160)
-									local vals={}
-									for _,v in ipairs(ObservedArgs[self]) do table.insert(vals, tostring(v):sub(1,25)) end
-									Log.Text = "Spied: "..self.Name.." ("..table.concat(types,", ")..")"
-								end)
+								task.spawn(function() pcall(function() AddRemote(self) end) end)
 							end
 						end
 					end
@@ -1131,11 +1132,36 @@ local function setSpy(enabled)
 			if newcclosure then wrapper = newcclosure(wrapper) end
 			SpyHookOld = hookmetamethod(game, "__namecall", wrapper)
 		end)
-		Log.Text = "Spy ON — doing actions will capture"
+		Log.Text = "Spy ON — capturing (minimal, safe)"
+		ArgHint.Text = "Spy ON — do action in game to capture — select remote to see"
 	else
-		Log.Text = SpyEnabled and "Spy ON" or "Spy OFF — game not hooked (safe)"
+		if not enabled then
+			Log.Text = "Spy OFF — game not hooked (safe)"
+			ArgHint.Text = "Spy OFF — enable Spy to figure out args"
+		else
+			Log.Text = SpyEnabled and "Spy ON" or "Spy OFF"
+		end
 	end
 end
+-- Poll to update UI outside __namecall (safe)
+task.spawn(function()
+	while true do
+		task.wait(0.5)
+		if SpyEnabled and Selected and ObservedArgs[Selected] then
+			pcall(function()
+				local types={}
+				for _,v in ipairs(ObservedArgs[Selected]) do table.insert(types, typeof(v)) end
+				local n=#ObservedArgs[Selected]
+				if n==0 then
+					ArgHint.Text = "↻ Live: () no args — leave Args empty"
+				else
+					ArgHint.Text = "↻ Live: ("..table.concat(types, ", ")..") - "..n.." args — click to fill"
+				end
+				ArgHint.TextColor3 = Color3.fromRGB(110,200,160)
+			end)
+		end
+	end
+end)
 -- Spy starts OFF to not break games. Enable via Spy button.
 
 
