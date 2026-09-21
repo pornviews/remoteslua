@@ -74,31 +74,7 @@ end
 Main:GetPropertyChangedSignal("Position"):Connect(syncShadow)
 syncShadow()
 
-do
-	local dragging, dragInput, dragStart, startPos
-	local function update(input)
-		local delta = input.Position - dragStart
-		Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-	end
-	Main.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-			dragStart = input.Position
-			startPos = Main.Position
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then dragging = false end
-			end)
-		end
-	end)
-	Main.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			dragInput = input
-		end
-	end)
-	UIS.InputChanged:Connect(function(input)
-		if input == dragInput and dragging then update(input) end
-	end)
-end
+
 
 local Header = Instance.new("Frame", Main)
 Header.Size = UDim2.new(1, 0, 0, 44)
@@ -110,6 +86,33 @@ HeaderFix.Position = UDim2.new(0,0,1,-10)
 HeaderFix.Size = UDim2.new(1,0,0,10)
 HeaderFix.BackgroundColor3 = Color3.fromRGB(28,28,34)
 HeaderFix.BorderSizePixel = 0
+
+-- Dragging moved to Header to not block buttons
+do
+	local dragging, dragInput, dragStart, startPos
+	local function update(input)
+		local delta = input.Position - dragStart
+		Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+	Header.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStart = input.Position
+			startPos = Main.Position
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then dragging = false end
+			end)
+		end
+	end)
+	Header.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+			dragInput = input
+		end
+	end)
+	UIS.InputChanged:Connect(function(input)
+		if input == dragInput and dragging then update(input) end
+	end)
+end
 
 local Title = Instance.new("TextLabel", Header)
 Title.Size = UDim2.new(1, -120, 1, 0)
@@ -193,7 +196,7 @@ FilterFunc.BorderSizePixel = 0
 Instance.new("UICorner", FilterFunc).CornerRadius = UDim.new(1,0)
 
 local CountLabel = Instance.new("TextLabel", Main)
-CountLabel.Position = UDim2.new(0.48, -110, 0, 94)
+CountLabel.Position = UDim2.new(1, -120, 0, 94)
 CountLabel.Size = UDim2.new(0, 110, 0, 22)
 CountLabel.BackgroundTransparency = 1
 CountLabel.Text = "0 remotes"
@@ -211,6 +214,7 @@ RescanBtn.TextSize = 11
 RescanBtn.BackgroundColor3 = Color3.fromRGB(38,38,48)
 RescanBtn.TextColor3 = Color3.fromRGB(200,200,210)
 RescanBtn.BorderSizePixel = 0
+RescanBtn.ZIndex = 5
 Instance.new("UICorner", RescanBtn).CornerRadius = UDim.new(1,0)
 
 local IntervalBox = Instance.new("TextBox", Main)
@@ -223,6 +227,7 @@ IntervalBox.TextSize = 11
 IntervalBox.BackgroundColor3 = Color3.fromRGB(33,33,40)
 IntervalBox.TextColor3 = Color3.new(1,1,1)
 IntervalBox.BorderSizePixel = 0
+IntervalBox.ZIndex = 5
 Instance.new("UICorner", IntervalBox).CornerRadius = UDim.new(0, 6)
 local IntervalPad = Instance.new("UIPadding", IntervalBox)
 IntervalPad.PaddingLeft = UDim.new(0, 4)
@@ -236,6 +241,7 @@ AutoToggle.TextSize = 10
 AutoToggle.BackgroundColor3 = Color3.fromRGB(60,60,70)
 AutoToggle.TextColor3 = Color3.new(1,1,1)
 AutoToggle.BorderSizePixel = 0
+AutoToggle.ZIndex = 5
 Instance.new("UICorner", AutoToggle).CornerRadius = UDim.new(1,0)
 
 local SpyBtn = Instance.new("TextButton", Main)
@@ -248,6 +254,7 @@ SpyBtn.TextSize = 10
 SpyBtn.BackgroundColor3 = Color3.fromRGB(60,60,70)
 SpyBtn.TextColor3 = Color3.new(1,1,1)
 SpyBtn.BorderSizePixel = 0
+SpyBtn.ZIndex = 5
 Instance.new("UICorner", SpyBtn).CornerRadius = UDim.new(1,0)
 
 local List = Instance.new("ScrollingFrame", Main)
@@ -506,7 +513,7 @@ PLPad.PaddingBottom = UDim.new(0, 4)
 
 local HoneypotToggle = Instance.new("TextButton", InfoPanel)
 HoneypotToggle.Name = "HoneypotToggle"
-HoneypotToggle.Position = UDim2.new(0, 12, 0, 478)
+HoneypotToggle.Position = UDim2.new(0, 12, 0, 468)
 HoneypotToggle.Size = UDim2.new(1, -24, 0, 20)
 HoneypotToggle.Text = "🛡  Block honeypots: ON (tap to disable risky filter)"
 HoneypotToggle.Font = Enum.Font.GothamBold
@@ -517,7 +524,7 @@ HoneypotToggle.BorderSizePixel = 0
 Instance.new("UICorner", HoneypotToggle).CornerRadius = UDim.new(0, 6)
 
 local Run = Instance.new("TextButton", InfoPanel)
-Run.Position = UDim2.new(0, 12, 0, 502)
+Run.Position = UDim2.new(0, 12, 0, 492)
 Run.Size = UDim2.new(1, -24, 0, 38)
 Run.Text = "Fire / Invoke  ▶"
 Run.BackgroundColor3 = Color3.fromRGB(80,130,255)
