@@ -686,10 +686,10 @@ local function argToString(v)
 end
 local function findAliasNames(src, remoteName)
 	local aliases={}
-	for var in src:gmatch("local%s+([%w_]+)%s*=%s*[^\n]-WaitForChild%(%s*["']"..remoteName.."["']%s*%)") do
+	for var in src:gmatch("local%s+([%w_]+)%s*=%s*.-WaitForChild%s*%([^%)]*"..remoteName.."[^%)]*%)") do
 		table.insert(aliases, var)
 	end
-	for var in src:gmatch("([%w_]+)%s*=%s*[^\n]-WaitForChild%(%s*["']"..remoteName.."["']%s*%)") do
+	for var in src:gmatch("([%w_]+)%s*=%s*.-WaitForChild%s*%([^%)]*"..remoteName.."[^%)]*%)") do
 		if not table.find(aliases, var) then table.insert(aliases, var) end
 	end
 	-- also direct indexing: PowerRemotes.ClickPower
