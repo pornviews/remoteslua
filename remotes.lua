@@ -649,34 +649,6 @@ local function setClipboard(s)
 end
 
 local ObservedArgs = {}
-pcall(function()
-	if hookmetamethod and getnamecallmethod then
-		local old
-		local wrapper = function(self, ...)
-			local m
-			pcall(function() m = getnamecallmethod() end)
-			if m and (m == "FireServer" or m == "InvokeServer") and typeof(self) == "Instance" then
-				local ok2 = pcall(function() return self:IsA("RemoteEvent") or self:IsA("RemoteFunction") end)
-				if ok2 and (self:IsA("RemoteEvent") or self:IsA("RemoteFunction")) then
-					if not checkcaller or not checkcaller() then
-						ObservedArgs[self] = {...}
-						if Selected == self then
-							pcall(function()
-								local types = {}
-								for _,v in ipairs(ObservedArgs[self]) do table.insert(types, typeof(v)) end
-								ArgHint.Text = "↻ Observed: ("..table.concat(types, ", ")..") - "..tostring(#ObservedArgs[self]).." args"
-								ArgHint.TextColor3 = Color3.fromRGB(110,200,160)
-							end)
-						end
-					end
-				end
-			end
-			return old(self, ...)
-		end
-		if newcclosure then wrapper = newcclosure(wrapper) end
-		old = hookmetamethod(game, "__namecall", wrapper)
-	end
-end)
 
 local function inferHintFromName(name)
 	name=name:lower()
@@ -1076,6 +1048,42 @@ local function AddRemote(obj)
 	applyFilter()
 end
 
+-- Spy hook: as you do things, capture remotes + proper args and add to list
+pcall(function()
+	if hookmetamethod and getnamecallmethod then
+		local old
+		local wrapper = function(self, ...)
+			local m
+			pcall(function() m = getnamecallmethod() end)
+			if m and (m == "FireServer" or m == "InvokeServer") and typeof(self) == "Instance" then
+				local ok2 = pcall(function() return self:IsA("RemoteEvent") or self:IsA("RemoteFunction") end)
+				if ok2 and (self:IsA("RemoteEvent") or self:IsA("RemoteFunction")) then
+					if not checkcaller or not checkcaller() then
+						ObservedArgs[self] = {...}
+						if not Remotes[self] then
+							pcall(function() AddRemote(self) end)
+						end
+						if Selected == self then
+							pcall(function()
+								local types = {}
+								for _,v in ipairs(ObservedArgs[self]) do table.insert(types, typeof(v)) end
+								ArgHint.Text = "↻ Observed: ("..table.concat(types, ", ")..") - "..tostring(#ObservedArgs[self]).." args — click to fill"
+								ArgHint.TextColor3 = Color3.fromRGB(110,200,160)
+								local vals={}
+								for _,v in ipairs(ObservedArgs[self]) do table.insert(vals, tostring(v):sub(1,25)) end
+								Log.Text = "Spied: "..self.Name.." ("..table.concat(types,", ")..")"
+							end)
+						end
+					end
+				end
+			end
+			return old(self, ...)
+		end
+		if newcclosure then wrapper = newcclosure(wrapper) end
+		old = hookmetamethod(game, "__namecall", wrapper)
+	end
+end)
+
 local function Scan()
 	for _,v in ipairs(game:GetDescendants()) do
 		if v:IsA("RemoteEvent") or v:IsA("RemoteFunction") then
@@ -1085,7 +1093,10 @@ local function Scan()
 	applyFilter()
 end
 
-Scan()
+-- Spy mode: start empty, remotes added as you play
+-- Scan() -- disabled initial scan, use Rescan button for all
+notify("Spy mode: list empty -- do actions in game to capture remotes + args")
+Log.Text = "Spy active -- 0 spied -- Rescan for all"
 
 local function doRescan()
 	local before = tableCount(Remotes)
