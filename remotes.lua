@@ -9,23 +9,36 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 local gethui = gethui or (get_hidden_gui or gethiddenGui)
-local hostGui = nil
+local hostGui = PlayerGui
 pcall(function()
-	if gethui then hostGui = gethui() end
+	if gethui then 
+		local h = gethui()
+		if h and typeof(h)=="Instance" then hostGui = h end
+	end
 end)
-if not hostGui then hostGui = PlayerGui end
 
 if hostGui:FindFirstChild("RemotesLua") then hostGui:FindFirstChild("RemotesLua"):Destroy() end
 if PlayerGui:FindFirstChild("RemotesLua") then PlayerGui:FindFirstChild("RemotesLua"):Destroy() end
+if game:GetService("CoreGui"):FindFirstChild("RemotesLua") then pcall(function() game:GetService("CoreGui"):FindFirstChild("RemotesLua"):Destroy() end) end
 
 local Gui = Instance.new("ScreenGui")
 Gui.Name = "RemotesLua"
 Gui.ResetOnSpawn = false
 Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 Gui.IgnoreGuiInset = true
+Gui.DisplayOrder = 999
+Gui.Enabled = true
 Gui.Parent = hostGui
+-- also clone to PlayerGui as fallback visibility
+pcall(function()
+	if hostGui ~= PlayerGui then
+		local clone = Gui:Clone()
+		clone.Parent = PlayerGui
+	end
+end)
 pcall(function()
 	if syn and syn.protect_gui then syn.protect_gui(Gui) end
+	if gethui and Drawing then pcall(function() Gui.Parent = gethui() end) end
 end)
 
 local Main = Instance.new("Frame")
@@ -36,7 +49,6 @@ Main.Position = UDim2.new(0.5, 0, 0.5, 0)
 Main.BackgroundColor3 = Color3.fromRGB(18,18,22)
 Main.BorderSizePixel = 0
 Main.Active = false
-Main.Selectable = false
 Main.ClipsDescendants = false
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 14)
 local Stroke = Instance.new("UIStroke", Main)
@@ -1275,7 +1287,6 @@ FilterAll.MouseButton1Click:Connect(function()
 	applyFilter()
 end)
 FilterEvent.MouseButton1Click:Connect(function()
-	print("FilterEvent clicked")
 	CurrentFilter = "RemoteEvent"
 	FilterEvent.BackgroundColor3 = Color3.fromRGB(80,130,220)
 	FilterAll.BackgroundColor3 = Color3.fromRGB(38,38,48)
@@ -1283,7 +1294,6 @@ FilterEvent.MouseButton1Click:Connect(function()
 	applyFilter()
 end)
 FilterFunc.MouseButton1Click:Connect(function()
-	print("FilterFunc clicked")
 	CurrentFilter = "RemoteFunction"
 	FilterFunc.BackgroundColor3 = Color3.fromRGB(80,130,220)
 	FilterAll.BackgroundColor3 = Color3.fromRGB(38,38,48)
