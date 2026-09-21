@@ -35,7 +35,8 @@ Main.Size = UDim2.new(0, 920, 0, 600)
 Main.Position = UDim2.new(0.5, 0, 0.5, 0)
 Main.BackgroundColor3 = Color3.fromRGB(18,18,22)
 Main.BorderSizePixel = 0
-Main.Active = true
+Main.Active = false
+Main.Selectable = false
 Main.ClipsDescendants = false
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 14)
 local Stroke = Instance.new("UIStroke", Main)
@@ -171,6 +172,8 @@ FilterAll.TextSize = 11
 FilterAll.BackgroundColor3 = Color3.fromRGB(80,130,220)
 FilterAll.TextColor3 = Color3.new(1,1,1)
 FilterAll.BorderSizePixel = 0
+FilterAll.ZIndex = 10
+FilterAll.Active = true
 Instance.new("UICorner", FilterAll).CornerRadius = UDim.new(1,0)
 
 local FilterEvent = Instance.new("TextButton", Main)
@@ -182,6 +185,8 @@ FilterEvent.TextSize = 11
 FilterEvent.BackgroundColor3 = Color3.fromRGB(38,38,48)
 FilterEvent.TextColor3 = Color3.fromRGB(200,200,210)
 FilterEvent.BorderSizePixel = 0
+FilterEvent.ZIndex = 10
+FilterEvent.Active = true
 Instance.new("UICorner", FilterEvent).CornerRadius = UDim.new(1,0)
 
 local FilterFunc = Instance.new("TextButton", Main)
@@ -193,6 +198,8 @@ FilterFunc.TextSize = 11
 FilterFunc.BackgroundColor3 = Color3.fromRGB(38,38,48)
 FilterFunc.TextColor3 = Color3.fromRGB(200,200,210)
 FilterFunc.BorderSizePixel = 0
+FilterFunc.ZIndex = 10
+FilterFunc.Active = true
 Instance.new("UICorner", FilterFunc).CornerRadius = UDim.new(1,0)
 
 local CountLabel = Instance.new("TextLabel", Main)
@@ -1061,7 +1068,8 @@ end
 
 local function AddRemote(obj)
 	if Remotes[obj] then return end
-	if isUselessRemote(obj) then return end
+	-- isUselessRemote disabled for filter debug
+	-- if isUselessRemote(obj) then return end
 	Remotes[obj] = true
 	local Button = Instance.new("TextButton", List)
 	Button.Size = UDim2.new(1, -6, 0, 28)
@@ -1267,6 +1275,7 @@ FilterAll.MouseButton1Click:Connect(function()
 	applyFilter()
 end)
 FilterEvent.MouseButton1Click:Connect(function()
+	print("FilterEvent clicked")
 	CurrentFilter = "RemoteEvent"
 	FilterEvent.BackgroundColor3 = Color3.fromRGB(80,130,220)
 	FilterAll.BackgroundColor3 = Color3.fromRGB(38,38,48)
@@ -1274,6 +1283,7 @@ FilterEvent.MouseButton1Click:Connect(function()
 	applyFilter()
 end)
 FilterFunc.MouseButton1Click:Connect(function()
+	print("FilterFunc clicked")
 	CurrentFilter = "RemoteFunction"
 	FilterFunc.BackgroundColor3 = Color3.fromRGB(80,130,220)
 	FilterAll.BackgroundColor3 = Color3.fromRGB(38,38,48)
