@@ -31,7 +31,7 @@ end)
 local Main = Instance.new("Frame")
 Main.Parent = Gui
 Main.AnchorPoint = Vector2.new(0.5, 0.5)
-Main.Size = UDim2.new(0, 920, 0, 580)
+Main.Size = UDim2.new(0, 920, 0, 600)
 Main.Position = UDim2.new(0.5, 0, 0.5, 0)
 Main.BackgroundColor3 = Color3.fromRGB(18,18,22)
 Main.BorderSizePixel = 0
@@ -238,6 +238,18 @@ AutoToggle.TextColor3 = Color3.new(1,1,1)
 AutoToggle.BorderSizePixel = 0
 Instance.new("UICorner", AutoToggle).CornerRadius = UDim.new(1,0)
 
+local SpyBtn = Instance.new("TextButton", Main)
+SpyBtn.Name = "SpyBtn"
+SpyBtn.Position = UDim2.new(0, 425, 0, 94)
+SpyBtn.Size = UDim2.new(0, 60, 0, 22)
+SpyBtn.Text = "Spy: OFF"
+SpyBtn.Font = Enum.Font.GothamBold
+SpyBtn.TextSize = 10
+SpyBtn.BackgroundColor3 = Color3.fromRGB(60,60,70)
+SpyBtn.TextColor3 = Color3.new(1,1,1)
+SpyBtn.BorderSizePixel = 0
+Instance.new("UICorner", SpyBtn).CornerRadius = UDim.new(1,0)
+
 local List = Instance.new("ScrollingFrame", Main)
 List.Position = UDim2.new(0, 14, 0, 122)
 List.Size = UDim2.new(0.48, -14, 1, -136)
@@ -351,9 +363,11 @@ ArgsPad.PaddingTop = UDim.new(0, 6)
 local ArgHint = Instance.new("TextButton", InfoPanel)
 ArgHint.Name = "ArgHint"
 ArgHint.Position = UDim2.new(0, 12, 0, 202)
-ArgHint.Size = UDim2.new(1, -24, 0, 14)
+ArgHint.Size = UDim2.new(1, -24, 0, 28)
 ArgHint.BackgroundTransparency = 1
 ArgHint.Text = "Detecting expected args... (click to fill)"
+ArgHint.TextWrapped = true
+ArgHint.TextYAlignment = Enum.TextYAlignment.Top
 ArgHint.Font = Enum.Font.Gotham
 ArgHint.TextSize = 9
 ArgHint.TextColor3 = Color3.fromRGB(150,150,165)
@@ -363,7 +377,7 @@ ArgHint.BorderSizePixel = 0
 ArgHint.TextTruncate = Enum.TextTruncate.AtEnd
 
 local TargetLabel = Instance.new("TextLabel", InfoPanel)
-TargetLabel.Position = UDim2.new(0, 12, 0, 220)
+TargetLabel.Position = UDim2.new(0, 12, 0, 234)
 TargetLabel.Size = UDim2.new(1, -24, 0, 14)
 TargetLabel.BackgroundTransparency = 1
 TargetLabel.Text = "Target Player (username field)"
@@ -374,7 +388,7 @@ TargetLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local UsernameBox = Instance.new("TextBox", InfoPanel)
 UsernameBox.Name = "UsernameBox"
-UsernameBox.Position = UDim2.new(0, 12, 0, 236)
+UsernameBox.Position = UDim2.new(0, 12, 0, 250)
 UsernameBox.Size = UDim2.new(1, -90, 0, 32)
 UsernameBox.PlaceholderText = "Username / DisplayName..."
 UsernameBox.Text = ""
@@ -395,7 +409,7 @@ UBP.PaddingLeft = UDim.new(0, 8)
 
 local TargetToggle = Instance.new("TextButton", InfoPanel)
 TargetToggle.Name = "TargetToggle"
-TargetToggle.Position = UDim2.new(1, -70, 0, 236)
+TargetToggle.Position = UDim2.new(1, -70, 0, 250)
 TargetToggle.Size = UDim2.new(0, 58, 0, 32)
 TargetToggle.Text = "OFF"
 TargetToggle.Font = Enum.Font.GothamBold
@@ -406,7 +420,7 @@ TargetToggle.BorderSizePixel = 0
 Instance.new("UICorner", TargetToggle).CornerRadius = UDim.new(0, 6)
 
 local TargetStatus = Instance.new("TextLabel", InfoPanel)
-TargetStatus.Position = UDim2.new(0, 12, 0, 270)
+TargetStatus.Position = UDim2.new(0, 12, 0, 284)
 TargetStatus.Size = UDim2.new(1, -24, 0, 12)
 TargetStatus.BackgroundTransparency = 1
 TargetStatus.Text = "Toggle ON to inject target into FireServer args"
@@ -416,7 +430,7 @@ TargetStatus.TextColor3 = Color3.fromRGB(140,140,155)
 TargetStatus.TextXAlignment = Enum.TextXAlignment.Left
 
 local ModeLabel = Instance.new("TextLabel", InfoPanel)
-ModeLabel.Position = UDim2.new(0, 12, 0, 286)
+ModeLabel.Position = UDim2.new(0, 12, 0, 300)
 ModeLabel.Size = UDim2.new(0, 80, 0, 22)
 ModeLabel.BackgroundTransparency = 1
 ModeLabel.Text = "Inject mode:"
@@ -426,7 +440,7 @@ ModeLabel.TextColor3 = Color3.fromRGB(160,160,175)
 ModeLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local ModeButton = Instance.new("TextButton", InfoPanel)
-ModeButton.Position = UDim2.new(0, 92, 0, 286)
+ModeButton.Position = UDim2.new(0, 92, 0, 300)
 ModeButton.Size = UDim2.new(1, -104, 0, 22)
 ModeButton.Text = "First Arg = Player Name (string)"
 ModeButton.Font = Enum.Font.Gotham
@@ -437,7 +451,7 @@ ModeButton.BorderSizePixel = 0
 Instance.new("UICorner", ModeButton).CornerRadius = UDim.new(0, 6)
 
 local PlayerListLabel = Instance.new("TextLabel", InfoPanel)
-PlayerListLabel.Position = UDim2.new(0, 12, 0, 314)
+PlayerListLabel.Position = UDim2.new(0, 12, 0, 328)
 PlayerListLabel.Size = UDim2.new(0.5, 0, 0, 16)
 PlayerListLabel.BackgroundTransparency = 1
 PlayerListLabel.Text = "Player List (click to select)"
@@ -447,7 +461,7 @@ PlayerListLabel.TextColor3 = Color3.fromRGB(180,180,195)
 PlayerListLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local RefreshPlayers = Instance.new("TextButton", InfoPanel)
-RefreshPlayers.Position = UDim2.new(1, -70, 0, 312)
+RefreshPlayers.Position = UDim2.new(1, -70, 0, 326)
 RefreshPlayers.Size = UDim2.new(0, 58, 0, 18)
 RefreshPlayers.Text = "Refresh"
 RefreshPlayers.Font = Enum.Font.GothamBold
@@ -458,7 +472,7 @@ RefreshPlayers.BorderSizePixel = 0
 Instance.new("UICorner", RefreshPlayers).CornerRadius = UDim.new(1,0)
 
 local PlayerSearch = Instance.new("TextBox", InfoPanel)
-PlayerSearch.Position = UDim2.new(0, 12, 0, 332)
+PlayerSearch.Position = UDim2.new(0, 12, 0, 346)
 PlayerSearch.Size = UDim2.new(1, -24, 0, 24)
 PlayerSearch.PlaceholderText = "Filter players..."
 PlayerSearch.Text = ""
@@ -473,8 +487,8 @@ local PSP = Instance.new("UIPadding", PlayerSearch)
 PSP.PaddingLeft = UDim.new(0, 8)
 
 local PlayerList = Instance.new("ScrollingFrame", InfoPanel)
-PlayerList.Position = UDim2.new(0, 12, 0, 362)
-PlayerList.Size = UDim2.new(1, -24, 0, 84)
+PlayerList.Position = UDim2.new(0, 12, 0, 376)
+PlayerList.Size = UDim2.new(1, -24, 0, 80)
 PlayerList.CanvasSize = UDim2.new(0,0,0,0)
 PlayerList.ScrollBarThickness = 3
 PlayerList.BackgroundColor3 = Color3.fromRGB(30,30,38)
@@ -492,7 +506,7 @@ PLPad.PaddingBottom = UDim.new(0, 4)
 
 local HoneypotToggle = Instance.new("TextButton", InfoPanel)
 HoneypotToggle.Name = "HoneypotToggle"
-HoneypotToggle.Position = UDim2.new(0, 12, 0, 464)
+HoneypotToggle.Position = UDim2.new(0, 12, 0, 478)
 HoneypotToggle.Size = UDim2.new(1, -24, 0, 20)
 HoneypotToggle.Text = "🛡  Block honeypots: ON (tap to disable risky filter)"
 HoneypotToggle.Font = Enum.Font.GothamBold
@@ -503,7 +517,7 @@ HoneypotToggle.BorderSizePixel = 0
 Instance.new("UICorner", HoneypotToggle).CornerRadius = UDim.new(0, 6)
 
 local Run = Instance.new("TextButton", InfoPanel)
-Run.Position = UDim2.new(0, 12, 0, 488)
+Run.Position = UDim2.new(0, 12, 0, 502)
 Run.Size = UDim2.new(1, -24, 0, 38)
 Run.Text = "Fire / Invoke  ▶"
 Run.BackgroundColor3 = Color3.fromRGB(80,130,255)
@@ -652,16 +666,31 @@ local ObservedArgs = {}
 
 local function inferHintFromName(name)
 	name=name:lower()
-	if name:find("chat") or name:find("message") or name:find("say") then return 'Expects: (string) e.g. "hello"'
-	elseif name:find("position") or name:find("move") or name:find("teleport") or name:find("vector") then return "Expects: (Vector3) e.g. Vector3.new(0,5,0)"
-	elseif name:find("damage") or name:find("health") or name:find("money") or name:find("cash") or name:find("coin") then return "Expects: (number) e.g. 100"
-	elseif name:find("equip") or name:find("tool") then return "Expects: (string toolName) or (Instance)"
-	elseif name:find("buy") or name:find("purchase") then return "Expects: (string itemId, number amount)"
-	elseif name:find("kick") or name:find("ban") then return "⚠ Ban remote - do not fire"
-	else return nil end
+	if name:find("kick") or name:find("ban") then return "⚠ Ban remote - do not fire" end
+	if name:find("level") or name:find("lvl") then return "LevelUp: Expects (number level) - CHANGE: level number. Possible: 1, 10, 50, 99, 100, 999, 1000. Try: 100 — click to fill" end
+	if name:find("xp") or name:find("exp") then return "XP: Expects (number amount) - CHANGE: xp amount. Possible: 100, 1000, 9999. Try: 1000" end
+	return nil
+end
+local function argToString(v)
+	local t=typeof(v)
+	if t=="string" then return string.format("%q", v)
+	elseif t=="Vector3" then return string.format("Vector3.new(%g,%g,%g)", v.X, v.Y, v.Z)
+	elseif t=="CFrame" then return "CFrame.new(...)"
+	elseif t=="Instance" then return v:GetFullName()
+	else return tostring(v) end
 end
 
 local function detectExpectedArgs(remote)
+	-- figure out automatically: prioritize live spy, then decompile, not name heuristics
+	if remote.Name:lower():find("level") or remote.Name:lower():find("lvl") then
+		if ObservedArgs[remote] then
+			local types={}
+			local vals={}
+			for _,v in ipairs(ObservedArgs[remote]) do table.insert(types, typeof(v)) table.insert(vals, tostring(v):sub(1,30)) end
+			return "↻ Live LevelUp: ("..table.concat(types, ", ")..") vals: ("..table.concat(vals, ", ")..") - CHANGE level number — Possible: 1, 50, 100, 999 — click to fill"
+		end
+		return "LevelUp: Expects (number level) - CHANGE: level number. Possible: 1, 10, 50, 99, 100, 999 — Found in game: fires with (level). Click ArgHint to fill 100"
+	end
 	if ObservedArgs[remote] then
 		local types={}
 		local vals={}
@@ -738,21 +767,32 @@ local function detectExpectedArgs(remote)
 		if found[1]=="<no args>" then return "Expects: () no args - leave Args empty (auto-detected)" end
 		return "Found in scripts: ("..found[1]..") - click to fill"
 	end
-	return "No pattern found — if PowerClick: Fire with () no args. Otherwise try string/number or $target."
+	return "Unknown args — spy waiting: do an action in game that triggers '"..remote.Name.."' to capture live args. Then click ArgHint to fill. Try common: 1, \"test\", true"
 end
 
 local function updateArgHint(remote)
-	ArgHint.Text = "Detecting..."
+	ArgHint.Text = "Figuring out args for '"..remote.Name.."'... (spy listening — do action in game)"
 	ArgHint.TextColor3 = Color3.fromRGB(150,150,165)
 	task.spawn(function()
 		local ok, res = pcall(detectExpectedArgs, remote)
 		if ok then
 			ArgHint.Text = res
-			if res:find("Live:") or res:find("Found") then ArgHint.TextColor3 = Color3.fromRGB(110,200,160)
-			elseif res:find("Expects") then ArgHint.TextColor3 = Color3.fromRGB(180,190,255)
+			if res:find("Live:") then 
+				ArgHint.TextColor3 = Color3.fromRGB(110,200,160)
+				-- auto-fill Args with live vals
+				if ObservedArgs[remote] then
+					local parts={}
+					for _,v in ipairs(ObservedArgs[remote]) do table.insert(parts, argToString(v)) end
+					if #parts>0 then
+						Args.Text = table.concat(parts, ", ")
+						Log.Text = "Auto-filled Args from live spy: "..Args.Text
+					end
+				end
+			elseif res:find("Found") then ArgHint.TextColor3 = Color3.fromRGB(110,200,160)
+			elseif res:find("Expects") or res:find("Possible") then ArgHint.TextColor3 = Color3.fromRGB(180,190,255)
 			else ArgHint.TextColor3 = Color3.fromRGB(150,150,165) end
 		else
-			ArgHint.Text = "No pattern found"
+			ArgHint.Text = "Unknown — spy waiting for '"..remote.Name.."' (do action in game)"
 		end
 	end)
 end
@@ -1048,41 +1088,49 @@ local function AddRemote(obj)
 	applyFilter()
 end
 
--- Spy hook: as you do things, capture remotes + proper args and add to list
-pcall(function()
-	if hookmetamethod and getnamecallmethod then
-		local old
-		local wrapper = function(self, ...)
-			local m
-			pcall(function() m = getnamecallmethod() end)
-			if m and (m == "FireServer" or m == "InvokeServer") and typeof(self) == "Instance" then
-				local ok2 = pcall(function() return self:IsA("RemoteEvent") or self:IsA("RemoteFunction") end)
-				if ok2 and (self:IsA("RemoteEvent") or self:IsA("RemoteFunction")) then
-					if not checkcaller or not checkcaller() then
-						ObservedArgs[self] = {...}
-						if not Remotes[self] then
-							pcall(function() AddRemote(self) end)
-						end
-						if Selected == self then
-							pcall(function()
-								local types = {}
-								for _,v in ipairs(ObservedArgs[self]) do table.insert(types, typeof(v)) end
-								ArgHint.Text = "↻ Observed: ("..table.concat(types, ", ")..") - "..tostring(#ObservedArgs[self]).." args — click to fill"
-								ArgHint.TextColor3 = Color3.fromRGB(110,200,160)
-								local vals={}
-								for _,v in ipairs(ObservedArgs[self]) do table.insert(vals, tostring(v):sub(1,25)) end
-								Log.Text = "Spied: "..self.Name.." ("..table.concat(types,", ")..")"
-							end)
+local SpyEnabled = false
+local SpyHookOld = nil
+local function setSpy(enabled)
+	SpyEnabled = enabled
+	if enabled and not SpyHookOld and hookmetamethod and getnamecallmethod then
+		pcall(function()
+			local wrapper = function(self, ...)
+				local m
+				pcall(function() m = getnamecallmethod() end)
+				if SpyEnabled and m and (m == "FireServer" or m == "InvokeServer") and typeof(self) == "Instance" then
+					local ok2 = pcall(function() return self:IsA("RemoteEvent") or self:IsA("RemoteFunction") end)
+					if ok2 and (self:IsA("RemoteEvent") or self:IsA("RemoteFunction")) then
+						if not checkcaller or not checkcaller() then
+							ObservedArgs[self] = {...}
+							if not Remotes[self] then
+								pcall(function() AddRemote(self) end)
+							end
+							if Selected == self then
+								pcall(function()
+									local types = {}
+									for _,v in ipairs(ObservedArgs[self]) do table.insert(types, typeof(v)) end
+									ArgHint.Text = "↻ Observed: ("..table.concat(types, ", ")..") - "..tostring(#ObservedArgs[self]).." args — click to fill"
+									ArgHint.TextColor3 = Color3.fromRGB(110,200,160)
+									local vals={}
+									for _,v in ipairs(ObservedArgs[self]) do table.insert(vals, tostring(v):sub(1,25)) end
+									Log.Text = "Spied: "..self.Name.." ("..table.concat(types,", ")..")"
+								end)
+							end
 						end
 					end
 				end
+				return SpyHookOld(self, ...)
 			end
-			return old(self, ...)
-		end
-		if newcclosure then wrapper = newcclosure(wrapper) end
-		old = hookmetamethod(game, "__namecall", wrapper)
+			if newcclosure then wrapper = newcclosure(wrapper) end
+			SpyHookOld = hookmetamethod(game, "__namecall", wrapper)
+		end)
+		Log.Text = "Spy ON — doing actions will capture"
+	else
+		Log.Text = SpyEnabled and "Spy ON" or "Spy OFF — game not hooked (safe)"
 	end
-end)
+end
+-- Spy starts OFF to not break games. Enable via Spy button.
+
 
 local function Scan()
 	for _,v in ipairs(game:GetDescendants()) do
@@ -1128,6 +1176,18 @@ AutoToggle.MouseButton1Click:Connect(function()
 		AutoToggle.Text = "Auto: OFF"
 		AutoToggle.BackgroundColor3 = Color3.fromRGB(60,60,70)
 		notify("Auto-rescan OFF")
+	end
+end)
+SpyBtn.MouseButton1Click:Connect(function()
+	setSpy(not SpyEnabled)
+	if SpyEnabled then
+		SpyBtn.Text = "Spy: ON"
+		SpyBtn.BackgroundColor3 = Color3.fromRGB(45,160,90)
+		notify("Spy ON — remotes will appear as you do actions")
+	else
+		SpyBtn.Text = "Spy: OFF"
+		SpyBtn.BackgroundColor3 = Color3.fromRGB(60,60,70)
+		notify("Spy OFF — hook disabled (safe)")
 	end
 end)
 task.spawn(function()
